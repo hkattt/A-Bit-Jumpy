@@ -5,18 +5,15 @@ from Platformer_Settings import *
 vector = pygame.math.Vector2
 
 class Hero(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, game):
-        """"Initializes hero"""
+    def __init__(self, x, y, game):
+        """Initializes hero"""
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.width = width
-        self.height = height
         self.load_images()
         self.image = self.standing[0]
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
-        self.position = vector(int(WIDTH / 2), int(HEIGHT / 2))
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.velocity = vector(0, 0)
         self.acceleration = vector(0, 0)
         self.shooting = False

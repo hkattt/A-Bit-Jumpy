@@ -26,7 +26,6 @@ class Game():
         self.all_sprites = pygame.sprite.Group()
         self.environment = pygame.sprite.Group()
         self.arrows = pygame.sprite.Group()
-        self.hero = Hero(WIDTH / 2, HEIGHT / 2, 64, 64, self)
         #self.all_sprites.add(self.hero)
         for row, tiles in enumerate(self.map.tile_map):
             for column, tile in enumerate(tiles):
@@ -38,6 +37,10 @@ class Game():
                     self.environment_block = Environment(column, row, "d", self)
                     #self.environment.add(self.environment_block)
                     #self.all_sprites.add(self.environment_block)
+                elif tile == "P":
+                    self.hero = Hero(column, row, self)
+
+        self.camera = Camera(self.map.width, self.map.height)
         self.run()
 
     def run(self):
@@ -56,6 +59,7 @@ class Game():
         if collisions:
             self.hero.position.y = collisions[0].rect.top + 10
             self.hero.velocity.y = 0
+        self.camera.update(self.hero)
 
     def events(self):
         """Game loops events"""
@@ -71,7 +75,8 @@ class Game():
     def paint(self):
         """Draws onto the window"""
         self.screen.fill(SKY_BLUE)
-        self.all_sprites.draw(self.screen)
+        for sprite in self.all_sprites:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         pygame.display.update()
 
 game = Game()

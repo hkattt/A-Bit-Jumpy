@@ -5,9 +5,10 @@ from Platformer_Settings import *
 
 class Map():
     def __init__(self):
+        """Initializes Map and creates map list"""
         self.tile_map = []
         for line in open("Platformer_Map.txt"):
-            self.tile_map.append(line)
+            self.tile_map.append(line.strip())
     
         self.tile_width = len(self.tile_map[0])
         self.tile_height = len(self.tile_map)
@@ -16,14 +17,24 @@ class Map():
 
 class Camera():
     def __init__(self, width, height):
+        """Initializes camera"""
         self.camera = pygame.Rect(0, 0, width, height)
         self.width = width
         self.height = height
 
     def move_sprite(self, sprite):
-        sprite.rect.move(self.camera.topleft)
+        """Moves sprite objects relative to the cameras position"""
+        return sprite.rect.move(self.camera.topleft)
 
-    def update(self):
-        pass
-
+    def update(self, sprite):
+        """Moves the camera, which will follow a chosen sprite"""
+        x = -sprite.rect.x + int(WIDTH / 2)
+        y = -sprite.rect.y + int(HEIGHT / 2)
+        
+        # prevents camera from moving outside of the map
+        x = min(0, x) # left side limit
+        y = min(0, y) # top side limit
+        x = max(-(self.width - WIDTH), x) # right side limit
+        y = max(-(self.height - HEIGHT), y) # bottom side limit
+        self.camera = pygame.Rect(x, y, self.width, self.height)
 

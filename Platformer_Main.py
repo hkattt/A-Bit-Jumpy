@@ -1,0 +1,80 @@
+# Platformer main file
+
+# Importing required modules
+import pygame
+import random
+from Platformer_Settings import *
+from Platformer_Sprites import *
+from Platformer_Camera import *
+
+class Game():
+    def __init__(self):
+        """Initialize game window and pygame"""
+        pygame.init() 
+        pygame.mixer.init()
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        pygame.display.set_caption("Platformer")
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.load_map()
+
+    def load_map(self):
+        self.map = Map()
+
+    def new(self):
+        """Starts new game"""
+        self.all_sprites = pygame.sprite.Group()
+        self.environment = pygame.sprite.Group()
+        self.arrows = pygame.sprite.Group()
+        self.hero = Hero(WIDTH / 2, HEIGHT / 2, 64, 64, self)
+        #self.all_sprites.add(self.hero)
+        for row, tiles in enumerate(self.map.tile_map):
+            for column, tile in enumerate(tiles):
+                if tile == "g":
+                    self.environment_block = Environment(column, row, "g", self)
+                    #self.environment.add(self.environment_block)
+                    #self.all_sprites.add(self.environment_block)
+                elif tile == "d":
+                    self.environment_block = Environment(column, row, "d", self)
+                    #self.environment.add(self.environment_block)
+                    #self.all_sprites.add(self.environment_block)
+        self.run()
+
+    def run(self):
+        """Main game loop"""
+        self.playing = True
+        while self.playing:
+            self.clock.tick(FPS)
+            self.events()
+            self.update()
+            self.paint()
+
+    def update(self):
+        """Updates Window"""
+        self.all_sprites.update()
+        collisions = pygame.sprite.spritecollide(self.hero, self.environment, False)
+        if collisions:
+            self.hero.position.y = collisions[0].rect.top + 10
+            self.hero.velocity.y = 0
+
+    def events(self):
+        """Game loops events"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                if self.playing:
+                    self.playing = False
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.hero.do_jump()
+
+    def paint(self):
+        """Draws onto the window"""
+        self.screen.fill(SKY_BLUE)
+        self.all_sprites.draw(self.screen)
+        pygame.display.update()
+
+game = Game()
+while game.running:
+    game.new()
+pygame.quit()

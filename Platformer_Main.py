@@ -29,17 +29,11 @@ class Game():
         #self.all_sprites.add(self.hero)
         for row, tiles in enumerate(self.map.tile_map):
             for column, tile in enumerate(tiles):
-                if tile == "g":
-                    self.environment_block = Environment(column, row, "g", self)
-                    #self.environment.add(self.environment_block)
-                    #self.all_sprites.add(self.environment_block)
-                elif tile == "d":
-                    self.environment_block = Environment(column, row, "d", self)
-                    #self.environment.add(self.environment_block)
-                    #self.all_sprites.add(self.environment_block)
-                elif tile == "P":
-                    self.hero = Hero(column, row, self)
-
+                if tile != ".":
+                    if tile == "P":
+                        self.hero = Hero(column, row, self)
+                    else:
+                        self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
         self.run()
 

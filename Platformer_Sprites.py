@@ -128,8 +128,16 @@ class Environment(pygame.sprite.Sprite):
         self.load_images()
         if type == "g":
             self.image = self.grass[0]
+        elif type == "gr":
+            self.image = self.grass[1]
+        elif type == "gl":
+            self.image = self.grass[2]
         elif type == "d":
             self.image = self.dirt
+        elif type == "l":
+            self.image = self.lava
+        elif type == "w":
+            self.image = self.water
         self.rect = self.image.get_rect()
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
@@ -138,7 +146,8 @@ class Environment(pygame.sprite.Sprite):
         """Loads in images for the environment blocks"""
         self.grass = [pygame.image.load("grass_1.png"), pygame.image.load("grass_2.png"), pygame.image.load("grass_3.png")]
         self.dirt = pygame.image.load("dirt.png")
-        #self.lava = pygame.image.load("lava.png")
+        self.lava = pygame.image.load("lava.png")
+        self.water = pygame.image.load("water.png")
 
 class Arrow(pygame.sprite.Sprite):
     def __init__(self, direction, game):

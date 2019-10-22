@@ -2,13 +2,14 @@
 
 import pygame
 from Platformer_Settings import *
+from Platformer_Map import *
 
 class Map():
     def __init__(self):
         """Initializes Map and creates map list"""
         self.tile_map = []
-        for line in open("Platformer_Map.txt"):
-            self.tile_map.append(line.strip())
+        for line in tile_map:
+            self.tile_map.append(line)
     
         self.tile_width = len(self.tile_map[0])
         self.tile_height = len(self.tile_map)

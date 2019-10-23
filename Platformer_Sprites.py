@@ -49,6 +49,12 @@ class Hero(pygame.sprite.Sprite):
         if KEYS[pygame.K_RIGHT]:
             self.acceleration.x = ACC
             self.right, self.left = True, False
+        if KEYS[pygame.K_UP]:
+            if self.game.ladder.climb():
+                self.acceleration.y = -ACC
+        if KEYS[pygame.K_DOWN]:
+            if self.game.ladder.climb():
+                self.acceleration.y = ACC
 
         for arrow in self.game.arrows:
             if arrow.rect.centerx  > WIDTH or arrow.rect.centerx < 0 or arrow.hit == True:
@@ -132,19 +138,23 @@ class Environment(pygame.sprite.Sprite):
             self.image = self.grass[1]
         elif type == "gl":
             self.image = self.grass[2]
+        elif type == "hg":
+            self.image = self.grass[3]
         elif type == "d":
             self.image = self.dirt
         elif type == "l":
             self.image = self.lava
         elif type == "w":
             self.image = self.water
+        elif type == "la":
+            self.image = self.ladder
         self.rect = self.image.get_rect()
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
 
     def load_images(self):
         """Loads in images for the environment blocks"""
-        self.grass = [pygame.image.load("grass_1.png"), pygame.image.load("grass_2.png"), pygame.image.load("grass_3.png")]
+        self.grass = [pygame.image.load("grass_1.png"), pygame.image.load("grass_2.png"), pygame.image.load("grass_3.png"), pygame.image.load("half.png")]
         self.dirt = pygame.image.load("dirt.png")
         self.lava = pygame.image.load("lava.png")
         self.water = pygame.image.load("water.png")
@@ -190,3 +200,29 @@ class Arrow(pygame.sprite.Sprite):
     def load_images(self):
         self.right_arrow = pygame.image.load("arrow_right.png")
         self.left_arrow = pygame.image.load("arrow_left.png")
+
+class Ladder(pygame.sprite.Sprite):
+    def __init__(self, x, y, game):
+        self.groups = game.all_sprites, game.ladders
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.x = x
+        self.y = y
+        self.load_images()
+        self.image = self.ladder
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x * TILE_SIZE
+        self.rect.y = self.y * TILE_SIZE
+
+    def climb(self):
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.ladders, False)
+        if collisions:
+            #self.game.hero.x, self.game.hero.y = self.rect.x, self.rect.y
+            # self.game.hero.ladder = True
+            return True
+        return False
+
+    def load_images(self):
+        """Loads in images for the ladder blocks"""
+        self.ladder = pygame.image.load("ladder_1.png")
+

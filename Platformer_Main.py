@@ -24,6 +24,8 @@ class Game():
     def new(self):
         """Starts new game"""
         self.all_sprites = pygame.sprite.Group()
+        self.spawners = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
         self.environment = pygame.sprite.Group()
         self.arrows = pygame.sprite.Group()
         self.ladders = pygame.sprite.Group()
@@ -33,12 +35,15 @@ class Game():
                 if tile != ".":
                     if tile == "P":
                         self.hero_x, self.hero_y = column, row
+                    elif tile == "S":
+                        self.spawner = Spawner(column, row, self)
                     elif tile == "la":
                         self.ladder = Ladder(column, row, self)
                     else:
                         self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
         self.hero = Hero(self.hero_x, self.hero_y, self)
+        self.enemy_timer = 0
         self.run()
 
     def run(self):
@@ -52,6 +57,12 @@ class Game():
 
     def update(self):
         """Updates Window"""
+        current = pygame.time.get_ticks()
+        if current - self.enemy_timer > ENEMY_SPAWN + random.choice([-1000, 0, 1000, 3000]):
+            self.enemy_timer = current 
+            for spawner in self.spawners:
+                self.enemy = spawner.create_enemy()
+
         self.all_sprites.update()
         self.camera.update(self.hero)
 

@@ -13,6 +13,7 @@ class Hero(pygame.sprite.Sprite):
         self.load_images()
         self.image = self.standing[0]
         self.rect = self.image.get_rect()
+        self.rect.center = (64 / 2, 64 / 2)
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.velocity = vector(0, 0)
         self.acceleration = vector(0, 0)
@@ -24,17 +25,35 @@ class Hero(pygame.sprite.Sprite):
         self.left = False
         self.arrow_timer = 0
 
-    def do_jump(self):
-        self.rect.x += 11
-        collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-        self.rect.x -= 11
-        if collisions:
-            self.velocity.y = -12
+    def wall_collisions(self):
+        if self.velocity.y > 0:
+            collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+            if collisions:
+                lowest = collisions[0]
+                for collision in collisions:
+                    if collision.rect.bottom > lowest.rect.bottom:
+                        lowest = collision
+                if self.position.y + 10 < lowest.rect.center[1]:
+                    self.position.y = lowest.rect.top + 10
+                    self.velocity.y = 0
 
-    def update(self):
-        """Movement for the players hero"""
-        self.animation()
-        # This movement system was adapted from KidsCanCode Youtube channel.
+        if abs(self.velocity.x) > 0:
+            collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+            if collisions:
+                highest = collisions[0]
+                for collision in collisions:
+                    if collision.rect.bottom < highest.rect.bottom:
+                        highest = collision
+                    if self.rect.top > highest.rect.top:
+                        if self.velocity.x > 0:
+                            self.position.x = highest.rect.left - self.rect.width / 2
+                            self.velocity.x = 0
+                        if self.velocity.x < 0:
+                            self.position.x = highest.rect.right + self.rect.width / 2
+                            self.velocity.x = 0
+
+    def get_keys(self):
+         # This movement system was adapted from KidsCanCode Youtube channel.
         self.acceleration = vector(0, ACC)
 
         if self.arrow_timer > 0:
@@ -71,14 +90,30 @@ class Hero(pygame.sprite.Sprite):
                     arrow = Arrow("l", self.game)
 
         # Friction
+        #print(self.acceleration, self.velocity)
         self.acceleration += self.velocity * FRIC
         # Equations of motion
         self.velocity += self.acceleration
         if abs(self.velocity.x) < 0.2:
             self.velocity.x = 0
-        self.position += self.velocity + 0.5 * self.acceleration 
-
+        self.position += self.velocity + 0.5 * self.acceleration
+        print(self.position)
+        print(self.velocity)
         self.rect.midbottom = self.position
+
+    def do_jump(self):
+        """Performs hero jump"""
+        self.rect.x += 11
+        collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+        self.rect.x -= 11
+        if collisions:
+            self.velocity.y = -12
+
+    def update(self):
+        """Movement for the players hero"""
+        self.animation()
+        self.get_keys()
+        self.wall_collisions()
 
     def animation(self):
         current = pygame.time.get_ticks()
@@ -114,6 +149,8 @@ class Hero(pygame.sprite.Sprite):
                 self.previous_U = current
                 self.frame_count = (self.frame_count + 1) % len(self.standing)
                 self.image = self.standing[self.frame_count]
+
+        self.mask = pygame.mask.from_surface(self.image)
 
     def load_images(self):
         """Loads in images for sprite animation"""
@@ -225,4 +262,3 @@ class Ladder(pygame.sprite.Sprite):
     def load_images(self):
         """Loads in images for the ladder blocks"""
         self.ladder = pygame.image.load("ladder_1.png")
-

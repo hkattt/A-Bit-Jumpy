@@ -38,4 +38,3 @@ class Camera():
         x = max(-(self.width - WIDTH), x) # right side limit
         y = max(-(self.height - HEIGHT), y) # bottom side limit
         self.camera = pygame.Rect(x, y, self.width, self.height)
-

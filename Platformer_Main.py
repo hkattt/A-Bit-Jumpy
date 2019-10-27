@@ -53,11 +53,6 @@ class Game():
     def update(self):
         """Updates Window"""
         self.all_sprites.update()
-        if self.hero.velocity.y > 0:
-            collisions = pygame.sprite.spritecollide(self.hero, self.environment, False)
-            if collisions:
-                self.hero.position.y = collisions[0].rect.top + 10
-                self.hero.velocity.y = 0
         self.camera.update(self.hero)
 
     def events(self):

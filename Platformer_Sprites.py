@@ -12,9 +12,9 @@ class Hero(pygame.sprite.Sprite):
         self.game = game
         self.load_images()
         self.image = self.standing[0]
-        self.rect = self.image.get_rect()
-        self.rect.center = (64 / 2, 64 / 2)
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
         self.velocity = vector(0, 0)
         self.acceleration = vector(0, 0)
         self.shooting = False
@@ -26,6 +26,7 @@ class Hero(pygame.sprite.Sprite):
         self.arrow_timer = 0
 
     def wall_collisions(self):
+        """Checks if the hero collides with the walls"""
         if self.velocity.y > 0:
             collisions = pygame.sprite.spritecollide(self, self.game.environment, False, pygame.sprite.collide_mask)
             if collisions:
@@ -58,7 +59,7 @@ class Hero(pygame.sprite.Sprite):
 
         if self.arrow_timer > 0:
             self.arrow_timer += 1
-        if self.arrow_timer == 100:
+        if self.arrow_timer == 50:
             self.arrow_timer = 0
 
         KEYS = pygame.key.get_pressed()
@@ -104,7 +105,7 @@ class Hero(pygame.sprite.Sprite):
         collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
         self.rect.x -= 11
         if collisions:
-            self.velocity.y = -12
+            self.velocity.y = -14
 
     def update(self):
         """Movement for the players hero"""
@@ -116,7 +117,7 @@ class Hero(pygame.sprite.Sprite):
         current = pygame.time.get_ticks()
         # Shooting animation
         if self.shooting == True:
-            if current - self.previous_U > 250:
+            if current - self.previous_U > 50:
                 self.previous_U = current
                 self.frame_count = (self.frame_count + 1) % len(self.bow_left)
                 if self.frame_count == 12:
@@ -164,13 +165,67 @@ class Orc(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
-        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE)) 
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.velocity = vector(0, 0) 
         self.image = self.walking_left[0]
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        self.health = 100
+        self.frame_count = 0
+        self.previous_U = 0
+        if self.game.hero.position.x < self.position.x:
+            self.left = True
+            self.right = False
+        else:
+            self.right = True
+            self.left = False
 
-    """def update(self):
+    def wall_collisions(self):
+        """Checks if Orc collided with a wall"""
+        if self.velocity.y > 0:
+            collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+            if collisions:
+                lowest = collisions[0]
+                for collision in collisions:
+                    if collision.rect.bottom > lowest.rect.bottom:
+                        lowest = collision
+                if self.position.y + 10 < lowest.rect.center[1]:
+                    self.position.y = lowest.rect.top - self.rect.height + 15
+                    self.velocity.y = 0
+
+        if abs(self.velocity.x) > 0:
+                collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+                if collisions:
+                    highest = collisions[0]
+                    for collision in collisions:
+                        if collision.rect.bottom < highest.rect.bottom:
+                            highest = collision
+                        if self.rect.top > highest.rect.top:
+                            if self.velocity.x > 0:
+                                self.position.x = highest.rect.left - self.rect.width
+                                self.right = False
+                                self.left = True
+                            elif self.velocity.x < 0:
+                                self.position.x = highest.rect.right
+                                self.left = False
+                                self.right = True
+                            self.velocity.x = 0
+
+    def update(self):
+        self.animation()
+        self.move()
+        self.wall_collisions()
+        if self.health == 0:
+            self.game.enemies.remove(self)
+            self.game.all_sprites.remove(self)
+
+    def move(self):
+        """Moves orc character"""
         self.acceleration = vector(0, ACC)
+        if self.right:
+            self.acceleration.x = ACC
+        else:
+            self.acceleration.x = -ACC
         # Friction
         self.acceleration += self.velocity * FRIC
         # Equations of motion
@@ -178,8 +233,18 @@ class Orc(pygame.sprite.Sprite):
         if abs(self.velocity.x) < 0.2:
             self.velocity.x = 0
         self.position += self.velocity + 0.5 * self.acceleration
-        self.rect.midbottom = self.position"""
-        
+        self.rect.x, self.rect.y = self.position
+
+    def animation(self):
+        current = pygame.time.get_ticks()
+        if current - self.previous_U > 350:
+                self.previous_U = current
+                self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
+                if self.velocity.x > 0:
+                    self.image = self.walking_right[self.frame_count]
+                else:
+                    self.image = self.walking_left[self.frame_count]
+
     def load_images(self):
         """Loads in images for Orc sprite animation"""
         self.walking_left = [pygame.image.load("orc_walking_left_1.png"), pygame.image.load("orc_walking_left_2.png"), pygame.image.load("orc_walking_left_3.png"), pygame.image.load("orc_walking_left_4.png"), pygame.image.load("orc_walking_left_5.png"), pygame.image.load("orc_walking_left_6.png"), pygame.image.load("orc_walking_left_7.png"), pygame.image.load("orc_walking_left_8.png"), pygame.image.load("orc_walking_left_9.png")]
@@ -193,7 +258,7 @@ class Spawner(pygame.sprite.Sprite):
         self.game = game
         self.load_images()
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
-        self.image = self.door[0]
+        self.image = self.tunnel[0]
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
         self.previous_U = 0
@@ -209,16 +274,17 @@ class Spawner(pygame.sprite.Sprite):
     def animation(self):
         if self.spawning:
             current = pygame.time.get_ticks()
-            self.image = self.door[1]
-            if current - self.previous_U > 5000:
+            print(current - self.previous_U)
+            self.image = self.tunnel[1]
+            if current - self.previous_U > 8000:
                 self.previous_U = current
                 self.spawning = False
         else:
-            self.image = self.door[0]
+            self.image = self.tunnel[0]
 
     def load_images(self):
         """Loads in images for spawner animation"""
-        self.door = [pygame.image.load("door_closed.png"), pygame.image.load("door_open.png")]
+        self.tunnel = [pygame.image.load("tunnel_closed.png"), pygame.image.load("tunnel_open.png")]
 
 class Environment(pygame.sprite.Sprite):
     def __init__(self, x, y, type, game):
@@ -278,6 +344,7 @@ class Arrow(pygame.sprite.Sprite):
         self.hit = False
 
     def update(self):
+        self.hit_enemy()
         if self.direction == "r":
             self.acceleration.x = 0.3
         if self.direction == "l":
@@ -294,6 +361,13 @@ class Arrow(pygame.sprite.Sprite):
                 self.position.x = collisions[0].rect.left - 10
             if self.direction == "l":
                 self.position.x = collisions[0].rect.right + 10
+            self.velocity.x = 0
+            self.hit = True
+
+    def hit_enemy(self):
+        collisions = pygame.sprite.spritecollide(self, self.game.enemies, False)
+        if collisions:
+            collisions[0].health = 0
             self.velocity.x = 0
             self.hit = True
 
@@ -325,3 +399,19 @@ class Ladder(pygame.sprite.Sprite):
     def load_images(self):
         """Loads in images for the ladder blocks"""
         self.ladder = pygame.image.load("ladder_1.png")
+
+class Key(pygame.sprite.Sprite):
+    def __init__(self, x, y, game):
+        """Initiates Key"""
+        self.groups = game.all_sprites
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.load_images()
+        self.image = self.key
+        self.position = vector(int(x * TILE_SIZE), int(x * TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+
+    def load_images(self):
+        """Loads in images for the key"""
+        self.key = pygame.image.load("key_1.png")

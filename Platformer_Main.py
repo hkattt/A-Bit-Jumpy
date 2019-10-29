@@ -29,7 +29,6 @@ class Game():
         self.environment = pygame.sprite.Group()
         self.arrows = pygame.sprite.Group()
         self.ladders = pygame.sprite.Group()
-        #self.all_sprites.add(self.hero)
         for row, tiles in enumerate(self.map.tile_map):
             for column, tile in enumerate(tiles):
                 if tile != ".":
@@ -39,6 +38,8 @@ class Game():
                         self.spawner = Spawner(column, row, self)
                     elif tile == "la":
                         self.ladder = Ladder(column, row, self)
+                    elif tile == "K":
+                        self.key = Key(column, row, self)
                     else:
                         self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
@@ -76,7 +77,7 @@ class Game():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.hero.do_jump()
-
+   
     def paint(self):
         """Draws onto the window"""
         self.screen.fill(SKY_BLUE)

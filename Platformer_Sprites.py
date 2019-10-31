@@ -78,7 +78,7 @@ class Hero(pygame.sprite.Sprite):
                 self.acceleration.y = ACC
 
         for arrow in self.game.arrows:
-            if arrow.rect.centerx  > WIDTH or arrow.rect.centerx < 0 or arrow.hit == True:
+            if arrow.rect.centerx  > self.game.map.width or arrow.rect.centerx < 0 or arrow.hit == True:
                 self.game.arrows.remove(arrow)
                 self.game.all_sprites.remove(arrow)
                 

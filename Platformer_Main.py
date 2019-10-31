@@ -31,6 +31,7 @@ class Game():
         self.ladders = pygame.sprite.Group()
         self.keys = pygame.sprite.Group()
         self.doors = pygame.sprite.Group()
+        self.spikes = pygame.sprite.Group()
         for row, tiles in enumerate(self.map.tile_map):
             for column, tile in enumerate(tiles):
                 if tile != ".":
@@ -38,6 +39,10 @@ class Game():
                         self.hero_x, self.hero_y = column, row
                     elif tile == "D":
                         self.door = Door(column, row, self)
+                    elif tile == "s":
+                        self.spike = Spikes(column, row, self)
+                    elif tile == "O":
+                        self.orc = Orc(column, row, self)
                     elif tile == "S":
                         self.spawner = Spawner(column, row, self)
                     elif tile == "la":
@@ -81,6 +86,10 @@ class Game():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.hero.do_jump()
+
+        if self.hero.dead == True:
+            self.playing = False
+            self.running = False
    
     def paint(self):
         """Draws onto the window"""

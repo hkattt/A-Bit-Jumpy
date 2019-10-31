@@ -25,6 +25,7 @@ class Hero(pygame.sprite.Sprite):
         self.left = False
         self.arrow_timer = 0
         self.keys = []
+        self.dead = False
 
     def wall_collisions(self):
         """Checks if the hero collides with the walls"""
@@ -39,20 +40,19 @@ class Hero(pygame.sprite.Sprite):
                     self.position.y = lowest.rect.top + 10
                     self.velocity.y = 0
 
-        if self.velocity.y == 0:
-            if abs(self.velocity.x) > 0:
-                collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-                if collisions:
-                    highest = collisions[0]
-                    for collision in collisions:
-                        if collision.rect.bottom < highest.rect.bottom:
-                            highest = collision
-                        if self.rect.top > highest.rect.top:
-                            if self.velocity.x > 0:
-                                self.position.x = highest.rect.left - self.rect.width / 2
-                            elif self.velocity.x < 0:
-                                self.position.x = highest.rect.right + self.rect.width / 2
-                            self.velocity.x = 0
+        if abs(self.velocity.x) > 0 and self.velocity.y > 0:
+            collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+            if collisions:
+                highest = collisions[0]
+                for collision in collisions:
+                    if collision.rect.bottom < highest.rect.bottom:
+                        highest = collision
+                    if self.rect.top > highest.rect.top:
+                        if self.velocity.x > 0:
+                            self.position.x = highest.rect.left - self.rect.width / 2 
+                        elif self.velocity.x < 0:
+                            self.position.x = highest.rect.right + self.rect.width / 2 
+                        self.velocity.x = 0
 
     def get_keys(self):
          # This movement system was adapted from KidsCanCode Youtube channel.
@@ -114,6 +114,7 @@ class Hero(pygame.sprite.Sprite):
         self.get_keys()
         self.wall_collisions()
         self.game.key.grab_key()
+        self.game.spike.spike_hit()
 
     def animation(self):
         current = pygame.time.get_ticks()
@@ -175,12 +176,8 @@ class Orc(pygame.sprite.Sprite):
         self.health = 100
         self.frame_count = 0
         self.previous_U = 0
-        if self.game.hero.position.x < self.position.x:
-            self.left = True
-            self.right = False
-        else:
-            self.right = True
-            self.left = False
+        self.left = True
+        self.right = False
 
     def wall_collisions(self):
         """Checks if Orc collided with a wall"""
@@ -217,6 +214,7 @@ class Orc(pygame.sprite.Sprite):
         self.animation()
         self.move()
         self.wall_collisions()
+        self.attack()
         if self.health == 0:
             self.game.enemies.remove(self)
             self.game.all_sprites.remove(self)
@@ -224,10 +222,12 @@ class Orc(pygame.sprite.Sprite):
     def move(self):
         """Moves orc character"""
         self.acceleration = vector(0, ACC)
-        if self.right:
-            self.acceleration.x = ACC
-        else:
-            self.acceleration.x = -ACC
+        if abs(self.game.hero.position.x - self.position.x) < 350 and abs(self.game.hero.position.y - self.position.y) < 100:
+            if self.game.hero.position.x > self.position.x:
+                self.acceleration.x = ACC
+            else:
+                self.acceleration.x = -ACC
+        
         # Friction
         self.acceleration += self.velocity * FRIC
         # Equations of motion
@@ -236,6 +236,11 @@ class Orc(pygame.sprite.Sprite):
             self.velocity.x = 0
         self.position += self.velocity + 0.5 * self.acceleration
         self.rect.x, self.rect.y = self.position
+
+    def attack(self):
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.enemies, False)
+        if collisions:
+            self.game.hero.dead = True
 
     def animation(self):
         current = pygame.time.get_ticks()
@@ -401,6 +406,29 @@ class Ladder(pygame.sprite.Sprite):
         """Loads in images for the ladder blocks"""
         self.ladder = pygame.image.load("ladder_1.png")
 
+class Spikes(pygame.sprite.Sprite):
+    def __init__(self, x, y, game):
+        """Initiates Spikes"""
+        self.groups = game.all_sprites, game.spikes
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.x = x
+        self.y = y
+        self.load_images()
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.image = self.spikes
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+
+    def spike_hit(self):
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.spikes, False)
+        if collisions:
+            self.game.hero.dead = True
+
+    def load_images(self):
+        """Loads in image for the spikes"""
+        self.spikes = pygame.image.load("spikes.png")
+
 class Key(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
         """Initiates Key"""
@@ -409,7 +437,7 @@ class Key(pygame.sprite.Sprite):
         self.game = game
         self.load_images()
         self.image = self.key
-        self.position = vector(int(x * TILE_SIZE), int(x * TILE_SIZE))
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
         self.mask = pygame.mask.from_surface(self.image)
@@ -428,7 +456,7 @@ class Key(pygame.sprite.Sprite):
 
 class Door(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
-        """Initiates environment block"""
+        """Initiates door"""
         self.groups = game.all_sprites, game.doors
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game

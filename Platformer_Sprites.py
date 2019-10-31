@@ -24,6 +24,7 @@ class Hero(pygame.sprite.Sprite):
         self.right = False
         self.left = False
         self.arrow_timer = 0
+        self.keys = []
 
     def wall_collisions(self):
         """Checks if the hero collides with the walls"""
@@ -112,6 +113,7 @@ class Hero(pygame.sprite.Sprite):
         self.animation()
         self.get_keys()
         self.wall_collisions()
+        self.game.key.grab_key()
 
     def animation(self):
         current = pygame.time.get_ticks()
@@ -274,7 +276,6 @@ class Spawner(pygame.sprite.Sprite):
     def animation(self):
         if self.spawning:
             current = pygame.time.get_ticks()
-            print(current - self.previous_U)
             self.image = self.tunnel[1]
             if current - self.previous_U > 8000:
                 self.previous_U = current
@@ -403,7 +404,7 @@ class Ladder(pygame.sprite.Sprite):
 class Key(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
         """Initiates Key"""
-        self.groups = game.all_sprites
+        self.groups = game.all_sprites, game.keys
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
@@ -411,7 +412,46 @@ class Key(pygame.sprite.Sprite):
         self.position = vector(int(x * TILE_SIZE), int(x * TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        self.mask = pygame.mask.from_surface(self.image)
 
     def load_images(self):
         """Loads in images for the key"""
         self.key = pygame.image.load("key_1.png")
+
+    def grab_key(self):
+        """Checks if the hero can pick up the key"""
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.keys, False, pygame.sprite.collide_mask)
+        if collisions:
+            self.game.hero.keys.append(collisions[0])
+            self.game.keys.remove(collisions[0])
+            self.game.all_sprites.remove(collisions[0])
+
+class Door(pygame.sprite.Sprite):
+    def __init__(self, x, y, game):
+        """Initiates environment block"""
+        self.groups = game.all_sprites, game.doors
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.x = x
+        self.y = y
+        self.load_images()
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.image = self.door[0]
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+        self.open = False
+    
+    def update(self):
+        self.animation()
+
+    def animation(self):
+        if len(self.game.hero.keys) > 0:
+            collisions = pygame.sprite.spritecollide(self.game.hero, self.game.doors, False)
+            if collisions:
+                self.image = self.door[1]
+            else:
+                self.image = self.door[0]
+
+    def load_images(self):
+        """Loads in images for the door animation"""
+        self.door = [pygame.image.load("door_closed.png"), pygame.image.load("door_open.png")]

@@ -29,11 +29,15 @@ class Game():
         self.environment = pygame.sprite.Group()
         self.arrows = pygame.sprite.Group()
         self.ladders = pygame.sprite.Group()
+        self.keys = pygame.sprite.Group()
+        self.doors = pygame.sprite.Group()
         for row, tiles in enumerate(self.map.tile_map):
             for column, tile in enumerate(tiles):
                 if tile != ".":
                     if tile == "P":
                         self.hero_x, self.hero_y = column, row
+                    elif tile == "D":
+                        self.door = Door(column, row, self)
                     elif tile == "S":
                         self.spawner = Spawner(column, row, self)
                     elif tile == "la":

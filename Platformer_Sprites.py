@@ -40,7 +40,7 @@ class Hero(pygame.sprite.Sprite):
                     self.position.y = lowest.rect.top + 10
                     self.velocity.y = 0
 
-        if abs(self.velocity.x) > 0 and self.velocity.y > 0:
+        if abs(self.velocity.x) > 0 and abs(self.velocity.y) == 0:
             collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
             if collisions:
                 highest = collisions[0]
@@ -222,11 +222,11 @@ class Orc(pygame.sprite.Sprite):
     def move(self):
         """Moves orc character"""
         self.acceleration = vector(0, ACC)
-        if abs(self.game.hero.position.x - self.position.x) < 350 and abs(self.game.hero.position.y - self.position.y) < 100:
-            if self.game.hero.position.x > self.position.x:
-                self.acceleration.x = ACC
-            else:
-                self.acceleration.x = -ACC
+        #if abs(self.game.hero.position.x - self.position.x) < 350 and abs(self.game.hero.position.y - self.position.y) < 100:
+        #    if self.game.hero.position.x > self.position.x:
+                #self.acceleration.x = ACC
+            #else:
+            #    self.acceleration.x = -ACC
         
         # Friction
         self.acceleration += self.velocity * FRIC
@@ -419,9 +419,10 @@ class Spikes(pygame.sprite.Sprite):
         self.image = self.spikes
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        self.mask = pygame.mask.from_surface(self.image)
 
     def spike_hit(self):
-        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.spikes, False)
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.spikes, False, pygame.sprite.collide_mask)
         if collisions:
             self.game.hero.dead = True
 

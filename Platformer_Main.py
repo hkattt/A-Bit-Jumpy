@@ -20,7 +20,7 @@ class Game():
 
     def load_map(self):
         self.map = Map()
-
+ 
     def new(self):
         """Starts new game"""
         self.all_sprites = pygame.sprite.Group()
@@ -91,7 +91,7 @@ class Game():
             self.playing = False
             self.running = False
    
-    def paint(self):
+    def paint(self):  
         """Draws onto the window"""
         self.screen.fill(SKY_BLUE)
         for sprite in self.all_sprites:

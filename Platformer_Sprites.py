@@ -23,6 +23,7 @@ class Hero(pygame.sprite.Sprite):
         self.previous_U = 0
         self.right = False
         self.left = False
+        #self.ladder = False
         self.arrow_timer = 0
         self.keys = []
         self.dead = False
@@ -64,16 +65,16 @@ class Hero(pygame.sprite.Sprite):
             self.arrow_timer = 0
 
         KEYS = pygame.key.get_pressed()
-        if KEYS[pygame.K_LEFT]:
+        if KEYS[pygame.K_LEFT] or KEYS[pygame.K_a]:
             self.acceleration.x = -ACC
             self.left, self.right = True, False
-        if KEYS[pygame.K_RIGHT]:
+        if KEYS[pygame.K_RIGHT] or KEYS[pygame.K_d]:
             self.acceleration.x = ACC
             self.right, self.left = True, False
-        if KEYS[pygame.K_UP]:
+        if KEYS[pygame.K_UP] or KEYS[pygame.K_w]:
             if self.game.ladder.climb():
                 self.acceleration.y = -ACC
-        if KEYS[pygame.K_DOWN]:
+        if KEYS[pygame.K_DOWN] or KEYS[pygame.K_s] :
             if self.game.ladder.climb():
                 self.acceleration.y = ACC
 
@@ -82,7 +83,7 @@ class Hero(pygame.sprite.Sprite):
                 self.game.arrows.remove(arrow)
                 self.game.all_sprites.remove(arrow)
                 
-        if KEYS[pygame.K_s]:
+        if KEYS[pygame.K_LSHIFT] or KEYS[pygame.K_RSHIFT]:
             if len(self.game.arrows) < 5 and self.arrow_timer == 0:
                 self.shooting = True
                 self.arrow_timer = 1
@@ -136,7 +137,7 @@ class Hero(pygame.sprite.Sprite):
             self.running = False
         # Running animation
         if self.running:
-            if current - self.previous_U > 250:
+            if current - self.previous_U > 100:
                 self.previous_U = current
                 self.frame_count = (self.frame_count + 1) % len(self.running_left) 
                 if self.velocity.x > 0:
@@ -222,14 +223,14 @@ class Orc(pygame.sprite.Sprite):
     def move(self):
         """Moves orc character"""
         self.acceleration = vector(0, ACC)
-        #if abs(self.game.hero.position.x - self.position.x) < 350 and abs(self.game.hero.position.y - self.position.y) < 100:
-        #    if self.game.hero.position.x > self.position.x:
-                #self.acceleration.x = ACC
-            #else:
-            #    self.acceleration.x = -ACC
+        if abs(self.game.hero.position.x - self.position.x) < 1024 and abs(self.game.hero.position.y - self.position.y) < 100:
+            if self.game.hero.position.x > self.position.x:
+                self.acceleration.x = ORC_ACC
+            else:
+                self.acceleration.x = -ORC_ACC
         
         # Friction
-        self.acceleration += self.velocity * FRIC
+        self.acceleration += self.velocity * ORC_FRIC
         # Equations of motion
         self.velocity += self.acceleration
         if abs(self.velocity.x) < 0.2:
@@ -238,7 +239,7 @@ class Orc(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
 
     def attack(self):
-        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.enemies, False)
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.enemies, False, pygame.sprite.collide_mask)
         if collisions:
             self.game.hero.dead = True
 
@@ -398,8 +399,9 @@ class Ladder(pygame.sprite.Sprite):
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.ladders, False)
         if collisions:
             #self.game.hero.x, self.game.hero.y = self.rect.x, self.rect.y
-            # self.game.hero.ladder = True
+            #self.game.hero.ladder = True
             return True
+        #self.game.hero.ladder = False
         return False
 
     def load_images(self):

@@ -22,3 +22,7 @@ FPS = 40
 # Hero attributes
 ACC = 0.2
 FRIC = -0.05
+
+# Orc attributes
+ORC_ACC = 0.2
+ORC_FRIC = -0.1

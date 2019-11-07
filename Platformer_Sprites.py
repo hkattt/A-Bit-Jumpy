@@ -27,6 +27,7 @@ class Hero(pygame.sprite.Sprite):
         self.arrow_timer = 0
         self.keys = []
         self.dead = False
+        self.coins = 0
 
     def wall_collisions(self):
         """Checks if the hero collides with the walls"""
@@ -163,7 +164,7 @@ class Hero(pygame.sprite.Sprite):
         self.bow_right = [pygame.image.load("hero_bow_right_1.png"), pygame.image.load("hero_bow_right_2.png"), pygame.image.load("hero_bow_right_3.png"), pygame.image.load("hero_bow_right_4.png"), pygame.image.load("hero_bow_right_5.png"), pygame.image.load("hero_bow_right_6.png"), pygame.image.load("hero_bow_right_7.png"), pygame.image.load("hero_bow_right_8.png"), pygame.image.load("hero_bow_right_9.png"), pygame.image.load("hero_bow_right_10.png"), pygame.image.load("hero_bow_right_11.png"), pygame.image.load("hero_bow_right_12.png"), pygame.image.load("hero_bow_right_13.png")]
 
 class Orc(pygame.sprite.Sprite):
-    def __init__(self, x, y, game):
+    def __init__(self, x, y, game, spawner):
         """Initiates Orc"""
         self.groups = game.all_sprites, game.enemies
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -179,6 +180,7 @@ class Orc(pygame.sprite.Sprite):
         self.previous_U = 0
         self.left = True
         self.right = False
+        self.spawner = spawner
 
     def wall_collisions(self):
         """Checks if Orc collided with a wall"""
@@ -215,10 +217,13 @@ class Orc(pygame.sprite.Sprite):
         self.animation()
         self.move()
         self.wall_collisions()
+        #self.collisions()
         self.attack()
         if self.health == 0:
             self.game.enemies.remove(self)
             self.game.all_sprites.remove(self)
+            if self.spawner != None:
+                self.spawner.orcs.remove(self)
 
     def move(self):
         """Moves orc character"""
@@ -271,13 +276,15 @@ class Spawner(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
         self.previous_U = 0
         self.spawning = False
+        self.orcs = []
 
     def update(self):
         self.animation()
 
     def create_enemy(self):
-        self.spawning = True
-        return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game)
+        if len(self.orcs) < 3:
+            self.spawning = True
+            return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
 
     def animation(self):
         if self.spawning:
@@ -486,3 +493,31 @@ class Door(pygame.sprite.Sprite):
     def load_images(self):
         """Loads in images for the door animation"""
         self.door = [pygame.image.load("door_closed.png"), pygame.image.load("door_open.png")]
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y, game):
+        """Initiates coin"""
+        self.groups = game.all_sprites, game.coins
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.x = x
+        self.y = y
+        self.load_images()
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.image = self.coin
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+    
+    def update(self):
+        self.pick_up()
+
+    def pick_up(self):
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.coins, False)
+        if collisions:
+            self.game.hero.coins += 1
+            self.game.all_sprites.remove(collisions[0])
+            self.game.coins.remove(collisions[0])
+
+    def load_images(self):
+        """Loads in images for the coin"""
+        self.coin = pygame.image.load("gold_coin.png")

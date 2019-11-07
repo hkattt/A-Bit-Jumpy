@@ -6,6 +6,7 @@ import random
 from Platformer_Settings import *
 from Platformer_Sprites import *
 from Platformer_Camera import *
+from Platformer_Display import *
 
 class Game():
     def __init__(self):
@@ -32,6 +33,8 @@ class Game():
         self.keys = pygame.sprite.Group()
         self.doors = pygame.sprite.Group()
         self.spikes = pygame.sprite.Group()
+        self.coins = pygame.sprite.Group()
+        self.display_objects = pygame.sprite.Group()
         for row, tiles in enumerate(self.map.tile_map):
             for column, tile in enumerate(tiles):
                 if tile != ".":
@@ -42,7 +45,9 @@ class Game():
                     elif tile == "s":
                         self.spike = Spikes(column, row, self)
                     elif tile == "O":
-                        self.orc = Orc(column, row, self)
+                        self.orc = Orc(column, row, self, None)
+                    elif tile == "c":
+                        self.coin = Coin(column, row, self)
                     elif tile == "S":
                         self.spawner = Spawner(column, row, self)
                     elif tile == "la":
@@ -52,6 +57,7 @@ class Game():
                     else:
                         self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
+        self.coin_display = Coin_Count(0, 0, self)
         self.hero = Hero(self.hero_x, self.hero_y, self)
         self.enemy_timer = 0
         self.run()
@@ -72,6 +78,8 @@ class Game():
             self.enemy_timer = current 
             for spawner in self.spawners:
                 self.enemy = spawner.create_enemy()
+                if self.enemy != None:
+                    spawner.orcs.append(self.enemy)
 
         self.all_sprites.update()
         self.camera.update(self.hero)
@@ -90,7 +98,7 @@ class Game():
         if self.hero.dead == True:
             self.playing = False
             self.running = False
-   
+
     def paint(self):  
         """Draws onto the window"""
         self.screen.fill(SKY_BLUE)

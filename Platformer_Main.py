@@ -108,6 +108,7 @@ class Game():
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.display_objects:
             self.screen.blit(sprite.image, sprite)
+        self.coin_display.write(str(self.hero.coins), 45, self.coin_display.position.x + 64, self.coin_display.position.y + 8)
         pygame.display.update()
 
 game = Game()

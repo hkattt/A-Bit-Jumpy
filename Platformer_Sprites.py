@@ -249,6 +249,7 @@ class Orc(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
 
     def can_attack(self):
+
         if self.attack_cooldown > 0:
             self.attack_cooldown += 1
         if self.attack_cooldown > 30:
@@ -465,7 +466,8 @@ class Key(pygame.sprite.Sprite):
         self.game = game
         self.load_images()
         self.image = self.key
-        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.image = pygame.transform.scale(self.image, (40, 40))
+        self.position = vector(int(x * TILE_SIZE + 17), int(y * TILE_SIZE + 17))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
         self.mask = pygame.mask.from_surface(self.image)

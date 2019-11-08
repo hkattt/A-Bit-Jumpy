@@ -26,6 +26,7 @@ class Hero(pygame.sprite.Sprite):
         #self.ladder = False
         self.arrow_timer = 0
         self.keys = []
+        self.hearts = 3
         self.dead = False
         self.coins = 0
 
@@ -59,7 +60,6 @@ class Hero(pygame.sprite.Sprite):
     def get_keys(self):
          # This movement system was adapted from KidsCanCode Youtube channel.
         self.acceleration = vector(0, ACC)
-
         if self.arrow_timer > 0:
             self.arrow_timer += 1
         if self.arrow_timer == 50:
@@ -115,8 +115,12 @@ class Hero(pygame.sprite.Sprite):
         self.animation()
         self.get_keys()
         self.wall_collisions()
-        self.game.key.grab_key()
-        self.game.spike.spike_hit()
+        self.died()
+
+    def died(self):
+        """Checks if the player died"""
+        if self.hearts < 1:
+            self.dead = True
 
     def animation(self):
         current = pygame.time.get_ticks()
@@ -181,6 +185,7 @@ class Orc(pygame.sprite.Sprite):
         self.left = True
         self.right = False
         self.spawner = spawner
+        self.attack_cooldown = 0
 
     def wall_collisions(self):
         """Checks if Orc collided with a wall"""
@@ -217,8 +222,8 @@ class Orc(pygame.sprite.Sprite):
         self.animation()
         self.move()
         self.wall_collisions()
-        #self.collisions()
-        self.attack()
+        if self.can_attack():
+            self.attack()
         if self.health == 0:
             self.game.enemies.remove(self)
             self.game.all_sprites.remove(self)
@@ -243,10 +248,20 @@ class Orc(pygame.sprite.Sprite):
         self.position += self.velocity + 0.5 * self.acceleration
         self.rect.x, self.rect.y = self.position
 
+    def can_attack(self):
+        if self.attack_cooldown > 0:
+            self.attack_cooldown += 1
+        if self.attack_cooldown > 30:
+            self.attack_cooldown = 0
+        if self.attack_cooldown == 0:
+            return True
+        return False
+
     def attack(self):
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.enemies, False, pygame.sprite.collide_mask)
         if collisions:
-            self.game.hero.dead = True
+            self.attack_cooldown = 1
+            self.game.hero.hearts -= 1
 
     def animation(self):
         current = pygame.time.get_ticks()
@@ -430,10 +445,13 @@ class Spikes(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
         self.mask = pygame.mask.from_surface(self.image)
 
+    def update(self):
+        self.spike_hit()
+
     def spike_hit(self):
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.spikes, False, pygame.sprite.collide_mask)
         if collisions:
-            self.game.hero.dead = True
+            self.game.hero.hearts -= 3
 
     def load_images(self):
         """Loads in image for the spikes"""
@@ -452,9 +470,8 @@ class Key(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
         self.mask = pygame.mask.from_surface(self.image)
 
-    def load_images(self):
-        """Loads in images for the key"""
-        self.key = pygame.image.load("key_1.png")
+    def update(self):
+        self.grab_key()
 
     def grab_key(self):
         """Checks if the hero can pick up the key"""
@@ -463,6 +480,10 @@ class Key(pygame.sprite.Sprite):
             self.game.hero.keys.append(collisions[0])
             self.game.keys.remove(collisions[0])
             self.game.all_sprites.remove(collisions[0])
+
+    def load_images(self):
+        """Loads in images for the key"""
+        self.key = pygame.image.load("key_1.png")
 
 class Door(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
@@ -503,16 +524,18 @@ class Coin(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.load_images()
-        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.position = vector(int(x * TILE_SIZE + 17), int(y * TILE_SIZE + 17))
         self.image = self.coin
+        self.image = pygame.transform.scale(self.image, (30, 30))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        self.mask = pygame.mask.from_surface(self.image)
     
     def update(self):
         self.pick_up()
 
     def pick_up(self):
-        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.coins, False)
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.coins, False, pygame.sprite.collide_mask)
         if collisions:
             self.game.hero.coins += 1
             self.game.all_sprites.remove(collisions[0])

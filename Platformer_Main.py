@@ -22,7 +22,7 @@ class Game():
     def load_map(self):
         self.map = Map()
  
-    def new(self):
+    def new(self ):
         """Starts new game"""
         self.all_sprites = pygame.sprite.Group()
         self.spawners = pygame.sprite.Group()
@@ -57,7 +57,8 @@ class Game():
                     else:
                         self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
-        self.coin_display = Coin_Count(0, 0, self)
+        self.coin_display = Coin_Count(1, 0, self)
+        self.health_display = Health(0, 0, self)
         self.hero = Hero(self.hero_x, self.hero_y, self)
         self.enemy_timer = 0
         self.run()
@@ -82,6 +83,7 @@ class Game():
                     spawner.orcs.append(self.enemy)
 
         self.all_sprites.update()
+        self.display_objects.update()
         self.camera.update(self.hero)
 
     def events(self):
@@ -104,6 +106,8 @@ class Game():
         self.screen.fill(SKY_BLUE)
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.display_objects:
+            self.screen.blit(sprite.image, sprite)
         pygame.display.update()
 
 game = Game()

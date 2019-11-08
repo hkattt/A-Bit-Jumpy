@@ -8,7 +8,7 @@ font_name = pygame.font.match_font("times")
 class Display(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
         """Initiates display"""
-        self.groups = game.all_sprites, game.display_objects
+        self.groups = game.display_objects
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
@@ -25,7 +25,6 @@ class Coin_Count(Display):
         self.rect.x, self.rect.y = self.position
     
     def update(self):
-        print("hello")
         self.draw(str(self.game.hero.coins), 60, self.position.x, self.position.y)
 
     def draw(self, score, size, x, y):
@@ -39,3 +38,23 @@ class Coin_Count(Display):
     def load_images(self):
         """Loads in images for coin display"""
         self.coin = pygame.image.load("gold_coin.png")
+
+class Health(Display):
+    def __init__(self, x, y, game):
+        """Initiates health display"""
+        super().__init__(x, y, game)
+        self.load_images()
+        self.image = self.heart[0]
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+
+    def update(self):
+        if self.game.hero.hearts == 3:
+            self.image = self.heart[0]
+        elif self.game.hero.hearts == 2:
+            self.image = self.heart[1]
+        elif self.game.hero.hearts == 1:
+            self.image = self.heart[2]
+    
+    def load_images(self):
+        self.heart = [pygame.image.load("heart_full.png"), pygame.image.load("heart_half.png"), pygame.image.load("heart_empty.png")]

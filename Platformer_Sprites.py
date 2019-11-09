@@ -1,14 +1,18 @@
 # Platformer Sprites
 
+# Imports required modules
 import pygame
 import random
+# Imports settings file
 from Platformer_Settings import *
 vector = pygame.math.Vector2
 
 class Hero(pygame.sprite.Sprite):
+    """Hero (player) object"""
     def __init__(self, x, y, game):
         """Initializes hero"""
-        self.groups = game.all_sprites
+        self.groups = game.all_sprites # Hero groups
+        # Initiates the sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
@@ -31,7 +35,7 @@ class Hero(pygame.sprite.Sprite):
         self.coins = 0
     
     def update(self):
-        """Movement for the players hero"""
+        """Upadtes the hero object"""
         self.animation()
         self.get_keys()
         self.move()
@@ -40,49 +44,60 @@ class Hero(pygame.sprite.Sprite):
 
     def wall_collisions(self):
         """Checks if the hero collides with the walls"""
-        if self.velocity.y > 0:
+        # Falling
+        if self.velocity.y > 0: 
             collisions = pygame.sprite.spritecollide(self, self.game.environment, False, pygame.sprite.collide_mask)
-            if collisions:
+            if collisions: # Checks if the player had a collision
+                # Finds the lowest (closest to the bottom of the window) environmental block the player collided with
                 lowest = collisions[0]
                 for collision in collisions:
                     if collision.rect.bottom > lowest.rect.bottom:
                         lowest = collision
-                if self.position.y + 10 < lowest.rect.center[1]:
+                if self.position.y + 10 < lowest.rect.center[1]: # If the player is below the ground (sprite image)
                     self.position.y = lowest.rect.top + 10
                     self.velocity.y = 0
 
+        # Moving left or right and is not jumping or falling 
         if abs(self.velocity.x) > 0 and abs(self.velocity.y) == 0:
             collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-            if collisions:
+            if collisions: # Checks if the player had a collision
+                # Finds the highest (furthest from the bottom of the window) environmental block the player collided with
                 highest = collisions[0]
                 for collision in collisions:
                     if collision.rect.bottom < highest.rect.bottom:
                         highest = collision
-                    if self.rect.top > highest.rect.top:
-                        if self.velocity.x > 0:
+                    if self.rect.top > highest.rect.top: # Below the highest environmental block
+                        # Moving right 
+                        if self.velocity.x > 0: 
                             self.position.x = highest.rect.left - self.rect.width / 2 
+                        # Moving left
                         elif self.velocity.x < 0:
                             self.position.x = highest.rect.right + self.rect.width / 2 
                         self.velocity.x = 0
 
     def get_keys(self):
+        """Gets the users key inputs (events)"""
          # This movement system was adapted from KidsCanCode Youtube channel.
-        self.acceleration = vector(0, ACC)
+        self.acceleration = vector(0, ACC) # Applies gravity
+        # Arrow cooldown 
         if self.arrow_timer > 0:
             self.arrow_timer += 1
         if self.arrow_timer == 50:
             self.arrow_timer = 0
 
         KEYS = pygame.key.get_pressed()
-        if KEYS[pygame.K_LEFT] or KEYS[pygame.K_a]:
+        # Moving left
+        if KEYS[pygame.K_LEFT] or KEYS[pygame.K_a]: 
             self.acceleration.x = -ACC
             self.left, self.right = True, False
+        # Moving right
         if KEYS[pygame.K_RIGHT] or KEYS[pygame.K_d]:
             self.acceleration.x = ACC
             self.right, self.left = True, False
+        # Jump
         if KEYS[pygame.K_UP] or KEYS[pygame.K_w]:
             self.do_jump()
-                
+        # Shoot       
         if KEYS[pygame.K_LSHIFT] or KEYS[pygame.K_RSHIFT]:
             if len(self.game.arrows) < 5 and self.arrow_timer == 0:
                 self.shooting = True
@@ -93,6 +108,7 @@ class Hero(pygame.sprite.Sprite):
                     arrow = Arrow("l", self.game)
 
     def move(self):
+        """Moves the hero sprite"""
         # Friction
         self.acceleration.x += self.velocity.x * FRIC
         # Equations of motion
@@ -106,9 +122,9 @@ class Hero(pygame.sprite.Sprite):
         """Performs hero jump"""
         self.rect.x += 11
         collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-        self.rect.x -= 11
-        if collisions:
-            if self.game.jump_pad.can_jump():
+        self.rect.x -= 11 
+        if collisions: # Checks if the player can jump (is on a platform)
+            if self.game.jump_pad.can_jump(): # Is on a jump pad
                 self.velocity.y = -10
             else:
                 self.velocity.y = -7
@@ -119,40 +135,41 @@ class Hero(pygame.sprite.Sprite):
             self.dead = True
 
     def animation(self):
+        """Animates the hero sprite"""
         current = pygame.time.get_ticks()
         # Shooting animation
         if self.shooting == True:
-            if current - self.previous_U > 50:
+            if current - self.previous_U > 50: # Determines the speed of the animation
                 self.previous_U = current
-                self.frame_count = (self.frame_count + 1) % len(self.bow_left)
-                if self.frame_count == 12:
+                self.frame_count = (self.frame_count + 1) % len(self.bow_left) # Calculates the correct frame
+                if self.frame_count == 12: 
                     self.shooting = False
+                # Looking right
                 if self.right:
                     self.image = self.bow_right[self.frame_count]
+                # Looking right
                 else:
                     self.image = self.bow_left[self.frame_count]
 
+        # Checks if the player is running
         if abs(self.velocity.x) > 0:
             self.running = True
         else:
             self.running = False
+
         # Running animation
         if self.running:
-            if current - self.previous_U > 100:
+            if current - self.previous_U > 100: # Animation speed
                 self.previous_U = current
                 self.frame_count = (self.frame_count + 1) % len(self.running_left) 
-                if self.velocity.x > 0:
+                # Moving right
+                if self.velocity.x > 0: 
                     self.image = self.running_right[self.frame_count]
+                # Moving left
                 else:
                     self.image = self.running_left[self.frame_count]
-                
-        # Idle animation (still)    
-        if not self.running and not self.shooting:
-            if current - self.previous_U > 300:
-                self.previous_U = current
-                self.frame_count = (self.frame_count + 1) % len(self.standing)
-                self.image = self.standing[self.frame_count]
 
+        # Creates an image mask for collisions
         self.mask = pygame.mask.from_surface(self.image)
 
     def load_images(self):
@@ -164,9 +181,11 @@ class Hero(pygame.sprite.Sprite):
         self.bow_right = [pygame.image.load("hero_bow_right_1.png"), pygame.image.load("hero_bow_right_2.png"), pygame.image.load("hero_bow_right_3.png"), pygame.image.load("hero_bow_right_4.png"), pygame.image.load("hero_bow_right_5.png"), pygame.image.load("hero_bow_right_6.png"), pygame.image.load("hero_bow_right_7.png"), pygame.image.load("hero_bow_right_8.png"), pygame.image.load("hero_bow_right_9.png"), pygame.image.load("hero_bow_right_10.png"), pygame.image.load("hero_bow_right_11.png"), pygame.image.load("hero_bow_right_12.png"), pygame.image.load("hero_bow_right_13.png")]
 
 class Orc(pygame.sprite.Sprite):
+    """Orc enemy object"""
     def __init__(self, x, y, game, spawner):
         """Initiates Orc"""
-        self.groups = game.all_sprites, game.orcs, game.enemies
+        self.groups = game.all_sprites, game.orcs, game.enemies # Orc groups
+        # Initiates the sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
@@ -185,36 +204,42 @@ class Orc(pygame.sprite.Sprite):
 
     def wall_collisions(self):
         """Checks if Orc collided with a wall"""
+        # Falling
         if self.velocity.y > 0:
             collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-            if collisions:
+            if collisions: # Checks if the orc had a collision
+                # Finds the lowest environment block the player collided with
                 lowest = collisions[0]
                 for collision in collisions:
                     if collision.rect.bottom > lowest.rect.bottom:
                         lowest = collision
-                if self.position.y + 10 < lowest.rect.center[1]:
+                if self.position.y + 10 < lowest.rect.center[1]: # If the orc is below the ground
                     self.position.y = lowest.rect.top - self.rect.height + 15
                     self.velocity.y = 0
 
+        # Moving left or right
         if abs(self.velocity.x) > 0:
                 collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-                if collisions:
+                if collisions: # Checks if the orc had a collision
+                    # Finds the highest environment block the orc collided with
                     highest = collisions[0]
                     for collision in collisions:
                         if collision.rect.bottom < highest.rect.bottom:
                             highest = collision
+                        # If the orc is below the highest environment block
                         if self.rect.top > highest.rect.top:
-                            if self.velocity.x > 0:
+                            if self.velocity.x > 0: # If the player is moving right
                                 self.position.x = highest.rect.left - self.rect.width
                                 self.right = False
                                 self.left = True
-                            elif self.velocity.x < 0:
+                            elif self.velocity.x < 0: # If the player is moving left
                                 self.position.x = highest.rect.right
                                 self.left = False
                                 self.right = True
                             self.velocity.x = 0
 
     def update(self):
+        """Updates the orc sprite"""
         self.animation()
         self.move()
         self.wall_collisions()
@@ -223,6 +248,7 @@ class Orc(pygame.sprite.Sprite):
         self.died()
     
     def died(self):
+        """Checks if the orc died"""
         if self.health == 0:
             self.game.enemies.remove(self)
             self.game.orcs.remove(self)
@@ -231,11 +257,14 @@ class Orc(pygame.sprite.Sprite):
                 self.spawner.orcs.remove(self)
 
     def move(self):
-        """Moves orc character"""
-        self.acceleration = vector(0, ACC)
+        """Moves orc sprite"""
+        self.acceleration = vector(0, ACC) # Applies gravity
+        # Moves towards the player (hero) is they are on the screen display and are on the same platform
         if abs(self.game.hero.position.x - self.position.x) < 1024 and abs(self.game.hero.position.y - self.position.y) < 100:
-            if self.game.hero.position.x > self.position.x:
+            # Moves to the right
+            if self.game.hero.position.x > self.position.x: 
                 self.acceleration.x = ORC_ACC
+            # Moves to the left
             else:
                 self.acceleration.x = -ORC_ACC
         
@@ -249,7 +278,7 @@ class Orc(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
 
     def can_attack(self):
-
+        """Checks if the attack cooldown is over"""
         if self.attack_cooldown > 0:
             self.attack_cooldown += 1
         if self.attack_cooldown > 30:
@@ -259,18 +288,23 @@ class Orc(pygame.sprite.Sprite):
         return False
 
     def attack(self):
+        """Attacks the player"""
+        # Attacks if the two sprites collide
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.orcs, False, pygame.sprite.collide_mask)
         if collisions:
             self.attack_cooldown = 1
             self.game.hero.hearts -= 1
 
     def animation(self):
+        """Animates the orc sprite"""
         current = pygame.time.get_ticks()
-        if current - self.previous_U > 350:
+        if current - self.previous_U > 350: # Determines the animation speed
             self.previous_U = current
-            self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
+            self.frame_count = (self.frame_count + 1) % len(self.walking_left) # Calculates the current frame 
+            # Walking right
             if self.velocity.x > 0:
                 self.image = self.walking_right[self.frame_count]
+            # Walking left
             else:
                 self.image = self.walking_left[self.frame_count]
 

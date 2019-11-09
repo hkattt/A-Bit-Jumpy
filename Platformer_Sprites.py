@@ -519,7 +519,7 @@ class Door(pygame.sprite.Sprite):
         self.animation()
 
     def animation(self):
-        if len(self.game.hero.keys) > 0:
+        if len(self.game.keys) == 0:
             collisions = pygame.sprite.spritecollide(self.game.hero, self.game.doors, False)
             if collisions:
                 self.image = self.door[1]

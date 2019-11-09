@@ -49,6 +49,9 @@ class Health(Display):
         self.rect.x, self.rect.y = self.position
 
     def update(self):
+        self.animation()
+
+    def animation(self):
         if self.game.hero.hearts == 3:
             self.image = self.heart[0]
         elif self.game.hero.hearts == 2:
@@ -58,3 +61,22 @@ class Health(Display):
     
     def load_images(self):
         self.heart = [pygame.image.load("heart_full.png"), pygame.image.load("heart_half.png"), pygame.image.load("heart_empty.png")]
+
+class Key_Display(Display):
+    def __init__(self, x, y, game):
+        """Initiates key display object"""
+        super().__init__(x, y, game)
+        self.load_images()
+        self.image = self.keys[0]
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+
+    def update(self):
+        self.animation()
+    
+    def animation(self):
+        if len(self.game.keys) <= 0:
+            self.image = self.keys[1]
+    
+    def load_images(self):
+        self.keys = [pygame.image.load("key_empty.png"), pygame.image.load("key_full.png")]

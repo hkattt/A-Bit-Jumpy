@@ -57,8 +57,9 @@ class Game():
                     else:
                         self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
-        self.coin_display = Coin_Count(1, 0, self)
         self.health_display = Health(0, 0, self)
+        self.key_display = Key_Display(1, 0, self)
+        self.coin_display = Coin_Count(2, 0, self)
         self.hero = Hero(self.hero_x, self.hero_y, self)
         self.enemy_timer = 0
         self.run()

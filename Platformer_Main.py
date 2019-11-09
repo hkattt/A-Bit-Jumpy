@@ -101,7 +101,6 @@ class Game():
 
         if self.hero.dead == True:
             self.playing = False
-            self.running = False
 
     def paint(self):  
         """Draws onto the window"""
@@ -110,10 +109,48 @@ class Game():
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.display_objects:
             self.screen.blit(sprite.image, sprite)
-        self.coin_display.write(str(self.hero.coins), 45, self.coin_display.position.x + 64, self.coin_display.position.y + 8)
+        self.write(str(self.hero.coins), WHITE, 45, self.coin_display.position.x + 64, self.coin_display.position.y + 8)
         pygame.display.update()
 
+    def write(self, text, colour, size, x, y):
+        """Draws text onto the screen"""
+        font = pygame.font.Font(font_name, size)
+        text_surface = font.render(text, True, colour)
+        text_rect = text_surface.get_rect()
+        text_rect.center = x, y
+        self.screen.blit(text_surface, text_rect)
+
+    def start_screen(self):
+        """Games start screen"""
+        self.screen.fill(LIGHT_GREEN)
+        self.write("Platformer", WHITE, 60, WIDTH / 2, HEIGHT / 5)
+        self.write("Move and jumper with arrows or WASD, shoot with Shift", WHITE, 25, WIDTH / 2, HEIGHT / 2)
+        self.write("Press any key to play!", WHITE, 25, WIDTH / 2, HEIGHT / 1.5)
+        pygame.display.update()
+        self.wait()
+        
+    def end_screen(self):
+        self.screen.fill(LIGHT_GREEN)
+        self.write("GAME OVER!!", WHITE, 60, WIDTH / 2, HEIGHT / 5)
+        self.write("Press and key to play again", WHITE, 25, WIDTH / 2, HEIGHT / 2)
+        pygame.display.update()
+        self.wait()
+
+    def wait(self):
+        """Waits for user input"""
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    self.running = False
+                if event.type == pygame.KEYUP:
+                    waiting = False
+
 game = Game()
+game.start_screen()
 while game.running:
     game.new()
+    game.end_screen()
 pygame.quit()

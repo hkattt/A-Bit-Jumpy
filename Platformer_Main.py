@@ -27,6 +27,8 @@ class Game():
         self.all_sprites = pygame.sprite.Group()
         self.spawners = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
+        self.orcs = pygame.sprite.Group()
+        self.flies = pygame.sprite.Group()
         self.environment = pygame.sprite.Group()
         self.arrows = pygame.sprite.Group()
         self.jump_pads = pygame.sprite.Group()
@@ -46,6 +48,8 @@ class Game():
                         self.spike = Spikes(column, row, self)
                     elif tile == "O":
                         self.orc = Orc(column, row, self, None)
+                    elif tile == "F":
+                        self.fly = Fly(column, row, self)
                     elif tile == "c":
                         self.coin = Coin(column, row, self)
                     elif tile == "S":

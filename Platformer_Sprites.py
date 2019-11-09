@@ -29,6 +29,14 @@ class Hero(pygame.sprite.Sprite):
         self.hearts = 3
         self.dead = False
         self.coins = 0
+    
+    def update(self):
+        """Movement for the players hero"""
+        self.animation()
+        self.get_keys()
+        self.move()
+        self.wall_collisions()
+        self.died()
 
     def wall_collisions(self):
         """Checks if the hero collides with the walls"""
@@ -74,11 +82,6 @@ class Hero(pygame.sprite.Sprite):
             self.right, self.left = True, False
         if KEYS[pygame.K_UP] or KEYS[pygame.K_w]:
             self.do_jump()
-
-        for arrow in self.game.arrows:
-            if arrow.rect.centerx  > self.game.map.width or arrow.rect.centerx < 0 or arrow.hit == True:
-                self.game.arrows.remove(arrow)
-                self.game.all_sprites.remove(arrow)
                 
         if KEYS[pygame.K_LSHIFT] or KEYS[pygame.K_RSHIFT]:
             if len(self.game.arrows) < 5 and self.arrow_timer == 0:
@@ -89,6 +92,7 @@ class Hero(pygame.sprite.Sprite):
                 else:
                     arrow = Arrow("l", self.game)
 
+    def move(self):
         # Friction
         self.acceleration.x += self.velocity.x * FRIC
         # Equations of motion
@@ -108,13 +112,6 @@ class Hero(pygame.sprite.Sprite):
                 self.velocity.y = -10
             else:
                 self.velocity.y = -7
-            
-    def update(self):
-        """Movement for the players hero"""
-        self.animation()
-        self.get_keys()
-        self.wall_collisions()
-        self.died()
 
     def died(self):
         """Checks if the player died"""
@@ -169,7 +166,7 @@ class Hero(pygame.sprite.Sprite):
 class Orc(pygame.sprite.Sprite):
     def __init__(self, x, y, game, spawner):
         """Initiates Orc"""
-        self.groups = game.all_sprites, game.enemies
+        self.groups = game.all_sprites, game.orcs, game.enemies
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
@@ -223,8 +220,12 @@ class Orc(pygame.sprite.Sprite):
         self.wall_collisions()
         if self.can_attack():
             self.attack()
+        self.died()
+    
+    def died(self):
         if self.health == 0:
             self.game.enemies.remove(self)
+            self.game.orcs.remove(self)
             self.game.all_sprites.remove(self)
             if self.spawner != None:
                 self.spawner.orcs.remove(self)
@@ -258,7 +259,7 @@ class Orc(pygame.sprite.Sprite):
         return False
 
     def attack(self):
-        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.enemies, False, pygame.sprite.collide_mask)
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.orcs, False, pygame.sprite.collide_mask)
         if collisions:
             self.attack_cooldown = 1
             self.game.hero.hearts -= 1
@@ -266,17 +267,80 @@ class Orc(pygame.sprite.Sprite):
     def animation(self):
         current = pygame.time.get_ticks()
         if current - self.previous_U > 350:
-                self.previous_U = current
-                self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
-                if self.velocity.x > 0:
-                    self.image = self.walking_right[self.frame_count]
-                else:
-                    self.image = self.walking_left[self.frame_count]
+            self.previous_U = current
+            self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
+            if self.velocity.x > 0:
+                self.image = self.walking_right[self.frame_count]
+            else:
+                self.image = self.walking_left[self.frame_count]
 
     def load_images(self):
         """Loads in images for Orc sprite animation"""
         self.walking_left = [pygame.image.load("orc_walking_left_1.png"), pygame.image.load("orc_walking_left_2.png"), pygame.image.load("orc_walking_left_3.png"), pygame.image.load("orc_walking_left_4.png"), pygame.image.load("orc_walking_left_5.png"), pygame.image.load("orc_walking_left_6.png"), pygame.image.load("orc_walking_left_7.png"), pygame.image.load("orc_walking_left_8.png"), pygame.image.load("orc_walking_left_9.png")]
-        self.walking_right = [pygame.image.load("orc_walking_right_1.png"), pygame.image.load("orc_walking_right_2.png"), pygame.image.load("orc_walking_right_3.png"), pygame.image.load("orc_walking_right_4.png"), pygame.image.load("orc_walking_right_5.png"), pygame.image.load("orc_walking_right_6.png"), pygame.image.load("orc_walking_right_7.png"), pygame.image.load("orc_walking_right_8.png"), pygame.image.load("orc_walking_right_9.png"),]
+        self.walking_right = [pygame.image.load("orc_walking_right_1.png"), pygame.image.load("orc_walking_right_2.png"), pygame.image.load("orc_walking_right_3.png"), pygame.image.load("orc_walking_right_4.png"), pygame.image.load("orc_walking_right_5.png"), pygame.image.load("orc_walking_right_6.png"), pygame.image.load("orc_walking_right_7.png"), pygame.image.load("orc_walking_right_8.png"), pygame.image.load("orc_walking_right_9.png")]
+
+class Fly(pygame.sprite.Sprite):
+    def __init__(self, x, y, game):
+        """Initiates fly"""
+        self.groups = game.all_sprites, game.flies, game.enemies
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.load_images()
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.velocity = vector(random.choice([1, 1.5]), random.choice([1, 1.5]))
+        self.image = self.fly_left[0]
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+        self.health = 200
+        self.frame_count = 0
+        self.previous_U = 0
+        self.left = True
+        self.right = False
+
+    def update(self):
+        self.animation()
+        self.move()
+        self.died()
+
+    def died(self):
+        if self.health == 0:
+            self.game.enemies.remove(self)
+            self.game.flies.remove(self)
+            self.game.all_sprites.remove(self)
+
+    def move(self):
+        #self.velocity.y += self.acceleration
+        if abs(self.game.hero.rect.midtop[0] - self.position.x) < 512 and abs(self.game.hero.rect.midtop[1] - self.position.y) < 256:
+            if self.game.hero.rect.midtop[0] > self.position.x:
+                self.position.x += self.velocity.x
+                self.right, self.left = True, False
+            else:
+                self.position.x -= self.velocity.x
+                self.right, self.left = False, True
+            if self.game.hero.rect.midtop[1] > self.position.y:
+                self.position.y += self.velocity.y
+            else:
+                self.position.y -= self.velocity.y
+        #self.velocity.y += self.acceleration
+        #self.position.y += self.velocity.y
+        self.rect.x, self.rect.y = self.position
+        #if abs(self.velocity.y) > 1:
+        #    self.acceleration *= -1
+
+    def animation(self):
+        current = pygame.time.get_ticks()
+        if current - self.previous_U > 150:
+            self.previous_U = current
+            self.frame_count = (self.frame_count + 1) % len(self.fly_left) 
+            if self.right:
+                self.image = self.fly_right[self.frame_count]
+            else:
+                self.image = self.fly_left[self.frame_count]
+
+    def load_images(self):
+        self.fly_right = [pygame.image.load("fly_right_1.png"), pygame.image.load("fly_right_2.png")]
+        self.fly_left = [pygame.image.load("fly_left_1.png"), pygame.image.load("fly_left_2.png")]
+        self.fly_dead = [pygame.image.load("fly_right_dead.png"), pygame.image.load("fly_left_dead.png")]
 
 class Spawner(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
@@ -370,6 +434,7 @@ class Arrow(pygame.sprite.Sprite):
         self.acceleration = vector(0,0)
         self.rect = self.image.get_rect()
         self.start_timer = 0
+        self.damage = 100
         self.hit = False
 
     def update(self):
@@ -396,9 +461,15 @@ class Arrow(pygame.sprite.Sprite):
     def hit_enemy(self):
         collisions = pygame.sprite.spritecollide(self, self.game.enemies, False)
         if collisions:
-            collisions[0].health = 0
+            collisions[0].health -= self.damage
             self.velocity.x = 0
             self.hit = True
+            self.remove()
+
+    def remove(self):
+        if self.rect.centerx  > self.game.map.width or self.rect.centerx < 0 or self.hit == True:
+            self.game.arrows.remove(self)
+            self.game.all_sprites.remove(self)
 
     def load_images(self):
         self.right_arrow = pygame.image.load("arrow_right.png")

@@ -3,10 +3,13 @@
 # Importing required modules
 import pygame
 import random
+import time
 from Platformer_Settings import *
 from Platformer_Sprites import *
 from Platformer_Camera import *
 from Platformer_Display import *
+
+#background = pygame.image.load("green_background.png")
 
 class Game():
     def __init__(self):
@@ -17,13 +20,14 @@ class Game():
         pygame.display.set_caption("Platformer")
         self.clock = pygame.time.Clock()
         self.running = True
-        self.load_map()
+        self.level = 1
 
     def load_map(self):
-        self.map = Map()
+        self.map = Map(self.level)
  
-    def new(self ):
+    def new(self):
         """Starts new game"""
+        self.load_map()
         self.all_sprites = pygame.sprite.Group()
         self.spawners = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
@@ -101,6 +105,7 @@ class Game():
 
         if self.hero.dead == True:
             self.playing = False
+            self.level = 1
 
     def paint(self):  
         """Draws onto the window"""
@@ -109,7 +114,7 @@ class Game():
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.display_objects:
             self.screen.blit(sprite.image, sprite)
-        self.write(str(self.hero.coins), WHITE, 45, self.coin_display.position.x + 64, self.coin_display.position.y + 8)
+        self.write(str(self.hero.coins), WHITE, 45, self.coin_display.position.x + 72, self.coin_display.position.y + 32)
         pygame.display.update()
 
     def write(self, text, colour, size, x, y):
@@ -130,11 +135,19 @@ class Game():
         self.wait()
         
     def end_screen(self):
-        self.screen.fill(LIGHT_GREEN)
-        self.write("GAME OVER!!", WHITE, 60, WIDTH / 2, HEIGHT / 5)
-        self.write("Press and key to play again", WHITE, 25, WIDTH / 2, HEIGHT / 2)
-        pygame.display.update()
-        self.wait()
+        if self.running and self.hero.dead:
+            self.screen.fill(LIGHT_GREEN)
+            self.write("GAME OVER!!", WHITE, 60, WIDTH / 2, HEIGHT / 5)
+            self.write("Press any key to play again", WHITE, 25, WIDTH / 2, HEIGHT / 2)
+            pygame.display.update()
+            self.wait()
+
+    def level_transition(self):
+        if self.running:
+            self.screen.fill(LIGHT_GREEN)
+            self.write("Level " + str(self.level), WHITE, 60, WIDTH / 2, HEIGHT / 2)
+            pygame.display.update()
+            time.sleep(1.5)
 
     def wait(self):
         """Waits for user input"""
@@ -151,6 +164,7 @@ class Game():
 game = Game()
 game.start_screen()
 while game.running:
+    game.level_transition()
     game.new()
     game.end_screen()
 pygame.quit()

@@ -5,10 +5,10 @@ from Platformer_Settings import *
 from Platformer_Map import *
 
 class Map():
-    def __init__(self):
+    def __init__(self, level):
         """Initializes Map and creates map list"""
         self.tile_map = []
-        for line in tile_map:
+        for line in tile_map[level - 1]:
             self.tile_map.append(line)
     
         self.tile_width = len(self.tile_map[0])

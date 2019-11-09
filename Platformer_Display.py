@@ -24,9 +24,6 @@ class Coin_Count(Display):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
     
-    #def update(self):
-    #    self.write(str(self.game.hero.coins), 60, self.position.x, self.position.y)
-
     def write(self, score, size, x, y):
         """Draws the players coin count onto the screen"""
         coin_count = pygame.font.Font(font_name, size)

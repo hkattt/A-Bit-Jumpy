@@ -588,6 +588,9 @@ class Door(pygame.sprite.Sprite):
     
     def update(self):
         self.animation()
+        if self.complete_level():
+            self.game.level += 1
+            self.game.playing = False
 
     def animation(self):
         if len(self.game.keys) == 0:
@@ -596,6 +599,13 @@ class Door(pygame.sprite.Sprite):
                 self.image = self.door[1]
             else:
                 self.image = self.door[0]
+
+    def complete_level(self):
+        if len(self.game.keys) == 0:
+            collisions = pygame.sprite.spritecollide(self.game.hero, self.game.doors, False)
+            if collisions:
+                return True
+        return False
 
     def load_images(self):
         """Loads in images for the door animation"""

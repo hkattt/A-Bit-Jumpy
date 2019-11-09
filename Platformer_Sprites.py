@@ -1,6 +1,7 @@
 # Platformer Sprites
 
 import pygame
+import random
 from Platformer_Settings import *
 vector = pygame.math.Vector2
 
@@ -23,7 +24,6 @@ class Hero(pygame.sprite.Sprite):
         self.previous_U = 0
         self.right = False
         self.left = False
-        #self.ladder = False
         self.arrow_timer = 0
         self.keys = []
         self.hearts = 3
@@ -73,11 +73,7 @@ class Hero(pygame.sprite.Sprite):
             self.acceleration.x = ACC
             self.right, self.left = True, False
         if KEYS[pygame.K_UP] or KEYS[pygame.K_w]:
-            if self.game.ladder.climb():
-                self.acceleration.y = -ACC
-        if KEYS[pygame.K_DOWN] or KEYS[pygame.K_s] :
-            if self.game.ladder.climb():
-                self.acceleration.y = ACC
+            self.do_jump()
 
         for arrow in self.game.arrows:
             if arrow.rect.centerx  > self.game.map.width or arrow.rect.centerx < 0 or arrow.hit == True:
@@ -94,7 +90,7 @@ class Hero(pygame.sprite.Sprite):
                     arrow = Arrow("l", self.game)
 
         # Friction
-        self.acceleration += self.velocity * FRIC
+        self.acceleration.x += self.velocity.x * FRIC
         # Equations of motion
         self.velocity += self.acceleration
         if abs(self.velocity.x) < 0.2:
@@ -108,8 +104,11 @@ class Hero(pygame.sprite.Sprite):
         collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
         self.rect.x -= 11
         if collisions:
-            self.velocity.y = -14
-
+            if self.game.jump_pad.can_jump():
+                self.velocity.y = -10
+            else:
+                self.velocity.y = -7
+            
     def update(self):
         """Movement for the players hero"""
         self.animation()
@@ -306,7 +305,7 @@ class Spawner(pygame.sprite.Sprite):
         if self.spawning:
             current = pygame.time.get_ticks()
             self.image = self.tunnel[1]
-            if current - self.previous_U > 8000:
+            if current - self.previous_U > 10000:
                 self.previous_U = current
                 self.spawning = False
         else:
@@ -405,31 +404,45 @@ class Arrow(pygame.sprite.Sprite):
         self.right_arrow = pygame.image.load("arrow_right.png")
         self.left_arrow = pygame.image.load("arrow_left.png")
 
-class Ladder(pygame.sprite.Sprite):
+class Jump_Pad(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
-        self.groups = game.all_sprites, game.ladders
+        self.groups = game.all_sprites, game.jump_pads
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
         self.y = y
         self.load_images()
-        self.image = self.ladder
+        self.image = self.jump_pad[0]
         self.rect = self.image.get_rect()
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
+        self.jumping = False
+        self.previous_U = 0
+        self.mask = pygame.mask.from_surface(self.image)
 
-    def climb(self):
-        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.ladders, False)
+    def update(self):
+        self.animation()
+    
+    def animation(self):
+        if self.jumping:
+            current = pygame.time.get_ticks()
+            self.image = self.jump_pad[1]
+            if current - self.previous_U > 5500:
+                self.previous_U = current
+                self.jumping = False
+        else:
+            self.image = self.jump_pad[0]
+
+    def can_jump(self):
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.jump_pads, False, pygame.sprite.collide_mask)
         if collisions:
-            #self.game.hero.x, self.game.hero.y = self.rect.x, self.rect.y
-            #self.game.hero.ladder = True
+            collisions[0].jumping = True
             return True
-        #self.game.hero.ladder = False
         return False
 
     def load_images(self):
         """Loads in images for the ladder blocks"""
-        self.ladder = pygame.image.load("ladder_1.png")
+        self.jump_pad = [pygame.image.load("jump_pad_1.png"), pygame.image.load("jump_pad_2.png")]
 
 class Spikes(pygame.sprite.Sprite):
     def __init__(self, x, y, game):
@@ -527,14 +540,27 @@ class Coin(pygame.sprite.Sprite):
         self.y = y
         self.load_images()
         self.position = vector(int(x * TILE_SIZE + 17), int(y * TILE_SIZE + 17))
-        self.image = self.coin
+        self.image = self.coin[0]
         self.image = pygame.transform.scale(self.image, (30, 30))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
-        self.mask = pygame.mask.from_surface(self.image)
+        self.up = True
+        self.down = False
+        self.previous_U = 0
+        self.frame_count = 0
     
     def update(self):
         self.pick_up()
+        self.animation()
+
+    def animation(self):
+        current = pygame.time.get_ticks()
+        if current - self.previous_U > 100:
+            self.previous_U = current
+            self.frame_count = (self.frame_count + 1) % len(self.coin) 
+            self.image = self.coin[self.frame_count]
+            self.image = pygame.transform.scale(self.image, (30, 30))
+            self.mask = pygame.mask.from_surface(self.image)
 
     def pick_up(self):
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.coins, False, pygame.sprite.collide_mask)
@@ -545,4 +571,4 @@ class Coin(pygame.sprite.Sprite):
 
     def load_images(self):
         """Loads in images for the coin"""
-        self.coin = pygame.image.load("gold_coin.png")
+        self.coin = [pygame.image.load("coin_1.png"), pygame.image.load("coin_2.png"), pygame.image.load("coin_3.png"), pygame.image.load("coin_4.png"), pygame.image.load("coin_5.png"), pygame.image.load("coin_6.png")]

@@ -29,7 +29,7 @@ class Game():
         self.enemies = pygame.sprite.Group()
         self.environment = pygame.sprite.Group()
         self.arrows = pygame.sprite.Group()
-        self.ladders = pygame.sprite.Group()
+        self.jump_pads = pygame.sprite.Group()
         self.keys = pygame.sprite.Group()
         self.doors = pygame.sprite.Group()
         self.spikes = pygame.sprite.Group()
@@ -50,10 +50,10 @@ class Game():
                         self.coin = Coin(column, row, self)
                     elif tile == "S":
                         self.spawner = Spawner(column, row, self)
-                    elif tile == "la":
-                        self.ladder = Ladder(column, row, self)
                     elif tile == "K":
                         self.key = Key(column, row, self)
+                    elif tile == "j":
+                        self.jump_pad = Jump_Pad(column, row, self)
                     else:
                         self.environment_block = Environment(column, row, tile, self)
         self.camera = Camera(self.map.width, self.map.height)
@@ -94,9 +94,6 @@ class Game():
                 if self.playing:
                     self.playing = False
                 self.running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    self.hero.do_jump()
 
         if self.hero.dead == True:
             self.playing = False

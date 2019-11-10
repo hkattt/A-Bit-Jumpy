@@ -135,7 +135,7 @@ class Hero(pygame.sprite.Sprite):
             # Can only jump if the player is standing on the block (can not jump inside the block)
             if self.rect.bottom == lowest.rect.top + 10:
                 if self.game.jump_pad.can_jump(): # Is on a jump pad
-                    self.velocity.y = -10
+                    self.velocity.y = -10.2
                 else:
                     self.velocity.y = -7
 
@@ -216,7 +216,7 @@ class Orc(pygame.sprite.Sprite):
         """Checks if Orc collided with a wall"""
         # Falling
         if self.velocity.y > 0:
-            collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+            collisions = pygame.sprite.spritecollide(self, self.game.environment, False, pygame.sprite.collide_mask)
             if collisions: # Checks if the orc had a collision
                 # Finds the lowest environment block the player collided with
                 lowest = collisions[0]
@@ -240,12 +240,8 @@ class Orc(pygame.sprite.Sprite):
                         if self.rect.top > highest.rect.top:
                             if self.velocity.x > 0: # If the player is moving right
                                 self.position.x = highest.rect.left - self.rect.width
-                                self.right = False
-                                self.left = True
                             elif self.velocity.x < 0: # If the player is moving left
                                 self.position.x = highest.rect.right
-                                self.left = False
-                                self.right = True
                             self.velocity.x = 0
 
     def update(self):
@@ -270,23 +266,45 @@ class Orc(pygame.sprite.Sprite):
     def move(self):
         """Moves orc sprite"""
         self.acceleration = vector(0, ACC) # Applies gravity
-        # Moves towards the player (hero) is they are on the screen display and are on the same platform
-        if abs(self.game.hero.position.x - self.position.x) < 1024 and abs(self.game.hero.position.y - self.position.y) < 100:
+        # Moves towards the player (hero) is they are on the same platform level and is within the x range (512 pixels)
+        if abs(self.game.hero.position.x - self.position.x) < 512 and self.game.hero.rect.centery > self.rect.y and self.game.hero.rect.centery < self.rect.y + self.rect.height:
             # Moves to the right
             if self.game.hero.rect.centerx > self.position.x: 
                 self.acceleration.x = ORC_ACC
             # Moves to the left
             else:
                 self.acceleration.x = -ORC_ACC
-        
-        # Friction
-        self.acceleration += self.velocity * ORC_FRIC
-        # Equations of motion
-        self.velocity += self.acceleration
-        if abs(self.velocity.x) < 0.2:
-            self.velocity.x = 0
-        self.position += self.velocity + 0.5 * self.acceleration
+             # Friction
+            self.acceleration += self.velocity * ORC_FRIC
+            # Equations of motion
+            self.velocity += self.acceleration
+            if abs(self.velocity.x) < 0.2:
+                self.velocity.x = 0
+            self.position += self.velocity + 0.5 * self.acceleration
+
+        else:
+            if self.right:
+                self.velocity.x = 1 
+            else:
+                self.velocity.x = -1
+            self.velocity += self.acceleration
+            self.position += self.velocity
+            
         self.rect.x, self.rect.y = self.position
+        if self.turn():
+            self.rect.x -= self.velocity.x
+            self.rect.y -= self.velocity.y
+
+
+    def turn(self):
+        collisions = pygame.sprite.spritecollide(self, self.game.environment, False, pygame.sprite.collide_mask)
+        if collisions:
+            return False
+        if self.velocity.x > 0:
+            self.right, self.left = False, True
+        else:
+            self.right, self.left = True, False
+        return True
 
     def can_attack(self):
         """Checks if the attack cool is over"""
@@ -321,6 +339,7 @@ class Orc(pygame.sprite.Sprite):
             # Walking left
             else:
                 self.image = self.walking_left[self.frame_count]
+            self.mask = pygame.mask.from_surface(self.image)
 
     def load_images(self):
         """Loads in images for Orc sprite animation"""
@@ -339,6 +358,7 @@ class Fly(pygame.sprite.Sprite):
         self.load_images()
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.velocity = vector(random.choice([1, 1.5]), random.choice([1, 1.5]))
+        self.acceleration = 0.2
         self.image = self.fly_left[0]
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
@@ -388,6 +408,7 @@ class Fly(pygame.sprite.Sprite):
         """Moves the fly sprite"""
         # Moves towards the hero (player) if they are within a certain range
         if abs(self.game.hero.rect.midtop[0] - self.position.x) < 512 and abs(self.game.hero.rect.midtop[1] - self.position.y) < 256:
+            self.velocity = vector(random.choice([1, 1.5]), random.choice([1, 1.5]))
             # Moves to the right
             if self.game.hero.rect.midtop[0] > self.position.x:
                 self.position.x += self.velocity.x
@@ -402,6 +423,21 @@ class Fly(pygame.sprite.Sprite):
             # Moves up
             else:
                 self.position.y -= self.velocity.y
+
+        else:
+            self.velocity.y += self.acceleration
+            self.position += self.velocity
+            if abs(self.velocity.y) > 2:
+                self.acceleration *= -1
+            if self.velocity.x > 0:
+                self.right, self.left = True, False
+            else:
+                self.right, self.left = False, True
+            if self.position.x > self.game.map.width:
+                self.velocity.x *= -1
+            elif self.position.x < 0:
+                self.velocity.x *= -1
+
         self.rect.x, self.rect.y = self.position
 
     def animation(self):

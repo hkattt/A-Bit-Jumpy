@@ -120,14 +120,19 @@ class Hero(pygame.sprite.Sprite):
 
     def do_jump(self):
         """Performs hero jump"""
-        self.rect.x += 11
         collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
-        self.rect.x -= 11 
         if collisions: # Checks if the player can jump (is on a platform)
-            if self.game.jump_pad.can_jump(): # Is on a jump pad
-                self.velocity.y = -10
-            else:
-                self.velocity.y = -7
+            # Finds the lowest (closest to the bottom of the screen) block the player collided with
+            lowest = collisions[0]
+            for collision in collisions:
+                if collision.rect.top > lowest.rect.top:
+                    lowest = collision
+            # Can only jump if the player is standing on the block (can not jump inside the block)
+            if self.rect.bottom == lowest.rect.top + 10:
+                if self.game.jump_pad.can_jump(): # Is on a jump pad
+                    self.velocity.y = -10
+                else:
+                    self.velocity.y = -7
 
     def died(self):
         """Checks if the player died"""
@@ -240,8 +245,6 @@ class Orc(pygame.sprite.Sprite):
 
     def update(self):
         """Updates the orc sprite"""
-        print(self.cooldown, "cooldown")
-        print(self.game.hero.hearts, "hearts")
         self.animation()
         self.move()
         self.wall_collisions()
@@ -295,7 +298,7 @@ class Orc(pygame.sprite.Sprite):
         # Attacks if the two sprite collide
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.orcs, False, pygame.sprite.collide_mask)
         if collisions:
-            self.cooldown = 1
+            collisions[0].cooldown = 1
             # Deals damage
             self.game.hero.hearts -= 1
 
@@ -352,7 +355,7 @@ class Fly(pygame.sprite.Sprite):
         """Checks if the attack cool is over"""
         if self.cooldown > 0:
             self.cooldown += 1
-        if self.cooldown  > 30:
+        if self.cooldown > 30:
             self.cooldown = 0
         if self.cooldown == 0:
             return True
@@ -363,7 +366,7 @@ class Fly(pygame.sprite.Sprite):
         # Attacks if the two sprite collide
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.flies, False, pygame.sprite.collide_mask)
         if collisions:
-            self.cooldown = 1
+            collisions[0].cooldown = 1
             # Deals damage
             self.game.hero.hearts -= 1
 

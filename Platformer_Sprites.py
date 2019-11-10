@@ -314,9 +314,11 @@ class Orc(pygame.sprite.Sprite):
         self.walking_right = [pygame.image.load("orc_walking_right_1.png"), pygame.image.load("orc_walking_right_2.png"), pygame.image.load("orc_walking_right_3.png"), pygame.image.load("orc_walking_right_4.png"), pygame.image.load("orc_walking_right_5.png"), pygame.image.load("orc_walking_right_6.png"), pygame.image.load("orc_walking_right_7.png"), pygame.image.load("orc_walking_right_8.png"), pygame.image.load("orc_walking_right_9.png")]
 
 class Fly(pygame.sprite.Sprite):
+    """Fly enemy object"""
     def __init__(self, x, y, game):
         """Initiates fly"""
-        self.groups = game.all_sprites, game.flies, game.enemies
+        self.groups = game.all_sprites, game.flies, game.enemies # Fly groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
@@ -332,55 +334,64 @@ class Fly(pygame.sprite.Sprite):
         self.right = False
 
     def update(self):
+        """Updates the fly sprite"""
         self.animation()
         self.move()
         self.died()
 
     def died(self):
+        """Checks if the fly died"""
         if self.health == 0:
             self.game.enemies.remove(self)
             self.game.flies.remove(self)
             self.game.all_sprites.remove(self)
 
     def move(self):
-        #self.velocity.y += self.acceleration
+        """Moves the fly sprite"""
+        # Moves towards the hero (player) if they are within a certain range
         if abs(self.game.hero.rect.midtop[0] - self.position.x) < 512 and abs(self.game.hero.rect.midtop[1] - self.position.y) < 256:
+            # Moves to the right
             if self.game.hero.rect.midtop[0] > self.position.x:
                 self.position.x += self.velocity.x
                 self.right, self.left = True, False
+            # Moves to the left
             else:
                 self.position.x -= self.velocity.x
                 self.right, self.left = False, True
+            # Moves down
             if self.game.hero.rect.midtop[1] > self.position.y:
                 self.position.y += self.velocity.y
+            # Moves up
             else:
                 self.position.y -= self.velocity.y
-        #self.velocity.y += self.acceleration
-        #self.position.y += self.velocity.y
         self.rect.x, self.rect.y = self.position
-        #if abs(self.velocity.y) > 1:
-        #    self.acceleration *= -1
 
     def animation(self):
+        """Animates the fly sprite"""
         current = pygame.time.get_ticks()
-        if current - self.previous_U > 150:
+        if current - self.previous_U > 150: # Determines animation speed
             self.previous_U = current
-            self.frame_count = (self.frame_count + 1) % len(self.fly_left) 
+            self.frame_count = (self.frame_count + 1) % len(self.fly_left) # Calculates the current frame
+            # Moving right 
             if self.right:
                 self.image = self.fly_right[self.frame_count]
+            # Moving left
             else:
                 self.image = self.fly_left[self.frame_count]
 
     def load_images(self):
+        """Loads in images for fly animation"""
         self.fly_right = [pygame.image.load("fly_right_1.png"), pygame.image.load("fly_right_2.png")]
         self.fly_left = [pygame.image.load("fly_left_1.png"), pygame.image.load("fly_left_2.png")]
         self.fly_dead = [pygame.image.load("fly_right_dead.png"), pygame.image.load("fly_left_dead.png")]
 
 class Spawner(pygame.sprite.Sprite):
+    """ Orc spawner object"""
     def __init__(self, x, y, game):
-        """Initiates mob spawner"""
-        self.groups = game.all_sprites, game.spawners
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        """Initiates orc spawner"""
+        self.groups = game.all_sprites, game.spawners # Spawner group
+        # Initiates the sprite class
+        pygame.sprite.Sprite.__init__(self, self.groups) 
         self.game = game
         self.load_images()
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
@@ -392,20 +403,26 @@ class Spawner(pygame.sprite.Sprite):
         self.orcs = []
 
     def update(self):
+        """Updates the spawner sprite"""
         self.animation()
 
     def create_enemy(self):
-        if len(self.orcs) < 3:
+        """Spawns an orc enemy"""
+        # Only spawns an orc when there are less than 3 alive (3 for each spawner)
+        if len(self.orcs) < 2: 
             self.spawning = True
             return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
 
     def animation(self):
+        """Animates the orc sprite"""
+        # If an orc is being spawned
         if self.spawning:
             current = pygame.time.get_ticks()
             self.image = self.tunnel[1]
-            if current - self.previous_U > 10000:
+            if current - self.previous_U > 10000: # Door stays open for a short time after an orc is spawned
                 self.previous_U = current
                 self.spawning = False
+        # Not spawning an orc
         else:
             self.image = self.tunnel[0]
 
@@ -414,9 +431,11 @@ class Spawner(pygame.sprite.Sprite):
         self.tunnel = [pygame.image.load("tunnel_closed.png"), pygame.image.load("tunnel_open.png")]
 
 class Environment(pygame.sprite.Sprite):
+    """Environmental blocks (terrian)"""
     def __init__(self, x, y, type, game):
         """Initiates environment block"""
-        self.groups = game.all_sprites, game.environment
+        self.groups = game.all_sprites, game.environment # Environment block groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
@@ -453,8 +472,11 @@ class Environment(pygame.sprite.Sprite):
         self.water = pygame.image.load("water.png")
 
 class Arrow(pygame.sprite.Sprite):
+    """Arrow object"""
     def __init__(self, direction, game):
-        self.groups = game.all_sprites, game.arrows
+        # Initiates arrow
+        self.groups = game.all_sprites, game.arrows # Arrow groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
@@ -472,46 +494,69 @@ class Arrow(pygame.sprite.Sprite):
         self.hit = False
 
     def update(self):
+        """Updates arrow sprite"""
         self.hit_enemy()
+        self.hit_wall()
+        self.move()   
+
+    def move(self):
+        """Moves the arrow sprite"""
+        # Moving right
         if self.direction == "r":
             self.acceleration.x = 0.3
+        # Moving left
         if self.direction == "l":
             self.acceleration.x = -0.3
         self.velocity += self.acceleration
         self.position += self.velocity + 0.5 * self.acceleration
 
         self.rect.center = self.position
+        # Starts the arrow cooldown
         self.start_timer += 1
 
-        collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+    def hit_enemy(self):
+        """Checks if the arrow struck an enemy"""
+        collisions = pygame.sprite.spritecollide(self, self.game.enemies, False)
+        # If the arrow hit an enemy
         if collisions:
+            # Deals damage
+            collisions[0].health -= self.damage
+            self.velocity.x = 0
+            self.hit = True
+            self.remove()
+    
+    def hit_wall(self):
+        """Checks if the arrow hit a wall"""
+        collisions = pygame.sprite.spritecollide(self, self.game.environment, False)
+        # Hit a wall
+        if collisions:
+            # Moving right
             if self.direction == "r":
                 self.position.x = collisions[0].rect.left - 10
+            # Moving left
             if self.direction == "l":
                 self.position.x = collisions[0].rect.right + 10
             self.velocity.x = 0
             self.hit = True
 
-    def hit_enemy(self):
-        collisions = pygame.sprite.spritecollide(self, self.game.enemies, False)
-        if collisions:
-            collisions[0].health -= self.damage
-            self.velocity.x = 0
-            self.hit = True
-            self.remove()
-
     def remove(self):
+        """Removes arrow from sprite groups"""
+        # If the arrow hit a object or is off the map
         if self.rect.centerx  > self.game.map.width or self.rect.centerx < 0 or self.hit == True:
             self.game.arrows.remove(self)
             self.game.all_sprites.remove(self)
 
     def load_images(self):
+        """Loads in arrow images"""
         self.right_arrow = pygame.image.load("arrow_right.png")
         self.left_arrow = pygame.image.load("arrow_left.png")
 
 class Jump_Pad(pygame.sprite.Sprite):
+    """Jump pad object"""
     def __init__(self, x, y, game):
-        self.groups = game.all_sprites, game.jump_pads
+        """Initiates jump pad"""
+        self.groups = game.all_sprites, game.jump_pads # Jump pad groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
@@ -526,33 +571,41 @@ class Jump_Pad(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
+        """Updates the jump pad sprite"""
         self.animation()
     
     def animation(self):
+        """Animates the jump pad"""
+        # If the jump pad is being used 
         if self.jumping:
             current = pygame.time.get_ticks()
             self.image = self.jump_pad[1]
-            if current - self.previous_U > 5500:
+            if current - self.previous_U > 5500: # Jump pad is extended for a short time after it is used
                 self.previous_U = current
                 self.jumping = False
+        # Not being used
         else:
             self.image = self.jump_pad[0]
 
     def can_jump(self):
+        """Checks if the hero (player) can use the jump pad"""
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.jump_pads, False, pygame.sprite.collide_mask)
-        if collisions:
+        # Is standing on jump pad
+        if collisions: 
             collisions[0].jumping = True
             return True
         return False
 
     def load_images(self):
-        """Loads in images for the ladder blocks"""
+        """Loads in images for the jump pad animation"""
         self.jump_pad = [pygame.image.load("jump_pad_1.png"), pygame.image.load("jump_pad_2.png")]
 
 class Spikes(pygame.sprite.Sprite):
+    """Spike object"""
     def __init__(self, x, y, game):
-        """Initiates Spikes"""
-        self.groups = game.all_sprites, game.spikes
+        """Initiates Spike"""
+        self.groups = game.all_sprites, game.spikes # Spike groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
@@ -562,14 +615,19 @@ class Spikes(pygame.sprite.Sprite):
         self.image = self.spikes
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        # Creates an image mask for collisions
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
+        """Updates the spike sprite"""
         self.spike_hit()
 
     def spike_hit(self):
+        """Checks if the player landed on a spike"""
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.spikes, False, pygame.sprite.collide_mask)
+        # Landed on a spike
         if collisions:
+            # Deals damage
             self.game.hero.hearts -= 3
 
     def load_images(self):
@@ -577,38 +635,47 @@ class Spikes(pygame.sprite.Sprite):
         self.spikes = pygame.image.load("spikes.png")
 
 class Key(pygame.sprite.Sprite):
+    """Key object"""
     def __init__(self, x, y, game):
         """Initiates Key"""
-        self.groups = game.all_sprites, game.keys
+        self.groups = game.all_sprites, game.keys # Key groups
+        # Initiates the sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
         self.image = self.key
+        # Makes the image smaller
         self.image = pygame.transform.scale(self.image, (40, 40))
         self.position = vector(int(x * TILE_SIZE + 17), int(y * TILE_SIZE + 17))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        # Creates an image mask for collisions
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
+        """Updates the key sprite"""
         self.grab_key()
 
     def grab_key(self):
         """Checks if the hero can pick up the key"""
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.keys, False, pygame.sprite.collide_mask)
+        # Can pick up the key
         if collisions:
+            # Gives hero object the key
             self.game.hero.keys.append(collisions[0])
             self.game.keys.remove(collisions[0])
             self.game.all_sprites.remove(collisions[0])
 
     def load_images(self):
-        """Loads in images for the key"""
+        """Loads in image for the key"""
         self.key = pygame.image.load("key_1.png")
 
 class Door(pygame.sprite.Sprite):
+    """Door object"""
     def __init__(self, x, y, game):
         """Initiates door"""
-        self.groups = game.all_sprites, game.doors
+        self.groups = game.all_sprites, game.doors # Door groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
@@ -621,22 +688,31 @@ class Door(pygame.sprite.Sprite):
         self.open = False
     
     def update(self):
+        """Updates the door sprite"""
         self.animation()
+        # Checks if the player beat the level
         if self.complete_level():
             self.game.level += 1
             self.game.playing = False
 
     def animation(self):
+        """Animates door sprite"""
+        # If the player has collected all the keys
         if len(self.game.keys) == 0:
             collisions = pygame.sprite.spritecollide(self.game.hero, self.game.doors, False)
+            # If the player is standing on the door it will open
             if collisions:
                 self.image = self.door[1]
+            # Player is not on the door
             else:
                 self.image = self.door[0]
 
     def complete_level(self):
+        """Checks if the player has passed the level"""
+        # Has collected all the keys
         if len(self.game.keys) == 0:
             collisions = pygame.sprite.spritecollide(self.game.hero, self.game.doors, False)
+            # Is standing on the door
             if collisions:
                 return True
         return False
@@ -646,9 +722,11 @@ class Door(pygame.sprite.Sprite):
         self.door = [pygame.image.load("door_closed.png"), pygame.image.load("door_open.png")]
 
 class Coin(pygame.sprite.Sprite):
+    """Coin object"""
     def __init__(self, x, y, game):
         """Initiates coin"""
-        self.groups = game.all_sprites, game.coins
+        self.groups = game.all_sprites, game.coins # Coin groups
+        # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.x = x
@@ -665,25 +743,30 @@ class Coin(pygame.sprite.Sprite):
         self.frame_count = 0
     
     def update(self):
+        """Updates coin sprite"""
         self.pick_up()
         self.animation()
 
     def animation(self):
+        """Animates coin sprite"""
         current = pygame.time.get_ticks()
-        if current - self.previous_U > 100:
+        if current - self.previous_U > 100: # Animation speed
             self.previous_U = current
-            self.frame_count = (self.frame_count + 1) % len(self.coin) 
+            self.frame_count = (self.frame_count + 1) % len(self.coin) # Calculates the current frame 
             self.image = self.coin[self.frame_count]
-            self.image = pygame.transform.scale(self.image, (30, 30))
-            self.mask = pygame.mask.from_surface(self.image)
+            self.image = pygame.transform.scale(self.image, (30, 30)) # Makes the image smaller
+            self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
 
     def pick_up(self):
+        """Checks if the hero can pick up the coin"""
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.coins, False, pygame.sprite.collide_mask)
+        # Player is standing on the coin
         if collisions:
+            # Hero gets the coin
             self.game.hero.coins += 1
             self.game.all_sprites.remove(collisions[0])
             self.game.coins.remove(collisions[0])
 
     def load_images(self):
-        """Loads in images for the coin"""
+        """Loads in images for coin animation"""
         self.coin = [pygame.image.load("coin_1.png"), pygame.image.load("coin_2.png"), pygame.image.load("coin_3.png"), pygame.image.load("coin_4.png"), pygame.image.load("coin_5.png"), pygame.image.load("coin_6.png")]

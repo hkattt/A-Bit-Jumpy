@@ -1,13 +1,17 @@
 # Map loader and Camera
 
+# Imports required modules
 import pygame
+# Imports other game files
 from Platformer_Settings import *
 from Platformer_Map import *
 
 class Map():
+    """Map object"""
     def __init__(self, level):
         """Initializes Map and creates map list"""
         self.tile_map = []
+        # Creates map for desired level
         for line in tile_map[level - 1]:
             self.tile_map.append(line)
     
@@ -17,8 +21,10 @@ class Map():
         self.height = self.tile_height * TILE_SIZE
 
 class Camera():
+    """Camera object"""
     def __init__(self, width, height):
         """Initializes camera"""
+        # Cameras size
         self.camera = pygame.Rect(0, 0, width, height)
         self.width = width
         self.height = height

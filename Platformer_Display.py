@@ -30,6 +30,14 @@ class Coin_Count(Display):
         self.image = self.coin
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        self.coin_space = 72
+    
+    def update(self):
+        if self.game.hero.coins >= 100:
+            self.coin_space = 92
+        elif self.game.hero.coins >= 10:
+            self.coin_space = 82
+        
 
     def load_images(self):
         """Loads in image for coin display"""

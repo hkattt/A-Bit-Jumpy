@@ -33,6 +33,11 @@ class Hero(pygame.sprite.Sprite):
         self.hearts = 3
         self.dead = False
         self.coins = self.game.hero_coins
+        self.max_coins = 999
+        if self.game.difficulty == "normal":
+            self.difficulty_multiplier = 1
+        else:
+            self.difficulty_multiplier = 100
     
     def update(self):
         """Upadtes the hero object"""
@@ -523,10 +528,8 @@ class Arrow(pygame.sprite.Sprite):
         self.acceleration = vector(0,0)
         self.rect = self.image.get_rect()
         self.start_timer = 0
-        if self.game.difficulty == "god":
-            self.damage = 1000
-        elif self.game.difficulty == "normal":
-            self.damage = 100
+        self.damage = 1000
+        self.damage = 100
         self.hit = False
 
     def update(self):
@@ -556,7 +559,7 @@ class Arrow(pygame.sprite.Sprite):
         # If the arrow hit an enemy
         if collisions:
             # Deals damage
-            collisions[0].health -= self.damage
+            collisions[0].health -= self.damage * self.game.hero.difficulty_multiplier
             self.velocity.x = 0
             self.hit = True
             self.remove()
@@ -800,8 +803,10 @@ class Coin(pygame.sprite.Sprite):
         # Player is standing on the coin
         if collisions:
             # Hero gets the coin
-            self.game.hero.coins += 1
-            self.game.hero_coins += 1
+            self.game.hero.coins += 1 * self.game.hero.difficulty_multiplier
+            self.game.hero_coins += 1 * self.game.hero.difficulty_multiplier
+            if self.game.hero.coins > self.game.hero.max_coins:
+                self.game.hero.coins, self.game.hero_coins = self.game.hero.max_coins, self.game.hero.max_coins
             self.game.all_sprites.remove(collisions[0])
             self.game.coins.remove(collisions[0])
 

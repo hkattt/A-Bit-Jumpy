@@ -129,7 +129,8 @@ class Game():
         for sprite in self.display_objects:
             self.screen.blit(sprite.image, sprite)
         # Players coin count
-        self.write(str(self.hero.coins), WHITE, 45, self.coin_display.position.x + 72, self.coin_display.position.y + 32)
+        print(self.coin_display.coin_space)
+        self.write(str(self.hero.coins), WHITE, 45, self.coin_display.position.x + self.coin_display.coin_space, self.coin_display.position.y + 32)
         pygame.display.update()
 
     def write(self, text, colour, size, x, y):

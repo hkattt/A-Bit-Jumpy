@@ -129,7 +129,6 @@ class Game():
         for sprite in self.display_objects:
             self.screen.blit(sprite.image, sprite)
         # Players coin count
-        print(self.coin_display.coin_space)
         self.write(str(self.hero.coins), WHITE, 45, self.coin_display.position.x + self.coin_display.coin_space, self.coin_display.position.y + 32)
         pygame.display.update()
 
@@ -143,7 +142,7 @@ class Game():
 
     def start_screen(self):
         """Games start screen"""
-        self.screen.fill(LIGHT_GREEN) # Makes the windows background green
+        self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
         self.write("Platformer", WHITE, 60, WIDTH / 2, HEIGHT / 5)
         self.write("Move and jumper with arrows or WASD, shoot with Shift", WHITE, 25, WIDTH / 2, HEIGHT / 2)
         self.write("Press any key to play!", WHITE, 25, WIDTH / 2, HEIGHT / 1.5)
@@ -153,7 +152,7 @@ class Game():
     def end_screen(self):
         """Games end screen"""
         if self.running and self.hero.dead: # Game is over and player has not died
-            self.screen.fill(LIGHT_GREEN)
+            self.screen.fill(LIGHT_GREEN[0])
             self.write("GAME OVER!!", WHITE, 60, WIDTH / 2, HEIGHT / 5)
             self.write("Press any key to play again", WHITE, 25, WIDTH / 2, HEIGHT / 2)
             pygame.display.update()
@@ -162,22 +161,22 @@ class Game():
     def level_transition(self):
         """Level transistion screen"""
         if self.running: # Game has not ended
-            self.screen.fill(LIGHT_GREEN)
+            self.screen.fill(LIGHT_GREEN[0])
             self.write("Level " + str(self.level), WHITE, 60, WIDTH / 2, HEIGHT / 2)
             pygame.display.update()
             time.sleep(1.5) # Stops the program for 1.5 seconds
 
     def difficulty_screen(self):
         """Lets the player pick the game difficulty"""
-        self.screen.fill(LIGHT_GREEN) # Makes the windows background green
+        self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
         self.write("Select The Game Difficulty!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
-        self.god_mode = Button(LIGHT_GREEN_2, WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", self)
-        self.normal_mode = Button(LIGHT_GREEN_2, WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", self)
-        self.god_mode.draw(self.screen)
-        self.normal_mode.draw(self.screen)
-        pygame.display.update()
+        self.god_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", self)
+        self.normal_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", self)
         waiting = True
         while waiting:
+            self.god_mode.draw(self.screen)
+            self.normal_mode.draw(self.screen)
+            pygame.display.update()
             for event in pygame.event.get():
                 position = pygame.mouse.get_pos()
 
@@ -188,6 +187,16 @@ class Game():
                     elif self.normal_mode.mouse_over(position):
                         self.difficulty = "normal"
                         waiting = False
+                
+                if event.type == pygame.MOUSEMOTION:
+                    if self.god_mode.mouse_over(position):
+                        self.god_mode.colour = LIGHT_GREEN[2]
+                    else:
+                        self.god_mode.colour = LIGHT_GREEN[1]
+                    if self.normal_mode.mouse_over(position):
+                        self.normal_mode.colour = LIGHT_GREEN[2]
+                    else:
+                        self.normal_mode.colour = LIGHT_GREEN[1]
 
     def wait(self):
         """Waits for user input"""

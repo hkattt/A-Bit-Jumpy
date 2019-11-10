@@ -99,7 +99,7 @@ class Key_Display(Display):
         self.keys = [pygame.image.load("key_empty.png"), pygame.image.load("key_full.png")]
 
 class Button():
-    """Button object"""
+    """Button object (was modified from button made by Tech With Tim, Youtube)"""
     def __init__(self, colour, x, y, width, height, text, game):
         """Initiates button"""
         self.game = game

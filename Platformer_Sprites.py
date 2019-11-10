@@ -82,7 +82,6 @@ class Hero(pygame.sprite.Sprite):
 
     def get_keys(self):
         """Gets the users key inputs (events)"""
-         # This movement system was adapted from KidsCanCode Youtube channel.
         self.acceleration = vector(0, ACC) # Applies gravity
         # Arrow cooldown 
         if self.arrow_timer > 0:
@@ -114,6 +113,7 @@ class Hero(pygame.sprite.Sprite):
 
     def move(self):
         """Moves the hero sprite"""
+        # This movement system was adapted from KidsCanCode Youtube channel.
         # Friction
         self.acceleration.x += self.velocity.x * FRIC
         # Equations of motion
@@ -295,13 +295,16 @@ class Orc(pygame.sprite.Sprite):
             self.rect.x -= self.velocity.x
             self.rect.y -= self.velocity.y
 
-
     def turn(self):
+        """Checks if orc is going to walk off a platform"""
         collisions = pygame.sprite.spritecollide(self, self.game.environment, False, pygame.sprite.collide_mask)
+        # If the orc is not collding with anything he must be falling
         if collisions:
             return False
+        # Moving right
         if self.velocity.x > 0:
             self.right, self.left = False, True
+        # Moving left
         else:
             self.right, self.left = True, False
         return True

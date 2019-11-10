@@ -281,16 +281,19 @@ class Orc(pygame.sprite.Sprite):
             if abs(self.velocity.x) < 0.2:
                 self.velocity.x = 0
             self.position += self.velocity + 0.5 * self.acceleration
-
+        # Is not following the player
         else:
+            # Finds the direction the orc should move
             if self.right:
                 self.velocity.x = 1 
             else:
                 self.velocity.x = -1
+            # Applies gravity and horizontal velocity
             self.velocity += self.acceleration
             self.position += self.velocity
             
         self.rect.x, self.rect.y = self.position
+        # Checks if the orc will fall off a platform
         if self.turn():
             self.rect.x -= self.velocity.x
             self.rect.y -= self.velocity.y

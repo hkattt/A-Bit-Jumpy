@@ -60,7 +60,7 @@ class Game():
                     elif tile == "O":
                         self.orc = Orc(column, row, self, None)
                     elif tile == "F":
-                        self.fly = Fly(column, row, self)
+                        Fly(column, row, self)
                     elif tile == "c":
                         self.coin = Coin(column, row, self)
                     elif tile == "S":

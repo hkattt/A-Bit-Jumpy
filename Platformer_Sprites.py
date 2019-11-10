@@ -327,10 +327,11 @@ class Orc(pygame.sprite.Sprite):
         # Attacks if the two sprite collide
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.orcs, False, pygame.sprite.collide_mask)
         if collisions:
-            collisions[0].cooldown = 1
-            # Deals damage
-            if self.game.difficulty == "normal":
-                self.game.hero.hearts -= 1
+            if collisions[0] == self:
+                collisions[0].cooldown = 1
+                # Deals damage
+                if self.game.difficulty == "normal":
+                    self.game.hero.hearts -= 1
 
     def animation(self):
         """Animates the orc sprite"""
@@ -385,6 +386,7 @@ class Fly(pygame.sprite.Sprite):
 
     def can_attack(self):
         """Checks if the attack cool is over"""
+        #print(self.rect.x, self.cooldown)
         if self.cooldown > 0:
             self.cooldown += 1
         if self.cooldown > 30:
@@ -398,10 +400,11 @@ class Fly(pygame.sprite.Sprite):
         # Attacks if the two sprite collide
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.flies, False, pygame.sprite.collide_mask)
         if collisions:
-            collisions[0].cooldown = 1
-            # Deals damage
-            if self.game.difficulty == "normal":
-                self.game.hero.hearts -= 1
+            if collisions[0] == self:
+                collisions[0].cooldown = 1
+                # Deals damage
+                if self.game.difficulty == "normal":
+                    self.game.hero.hearts -= 3
 
     def died(self):
         """Checks if the fly died"""
@@ -579,6 +582,7 @@ class Arrow(pygame.sprite.Sprite):
         self.hit_enemy()
         self.hit_wall()
         self.move()   
+        self.remove()
 
     def move(self):
         """Moves the arrow sprite"""

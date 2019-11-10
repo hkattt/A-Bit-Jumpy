@@ -255,7 +255,7 @@ class Orc(pygame.sprite.Sprite):
     def died(self):
         """Checks if the orc died"""
         #print(self.attack_cooldown, "die")
-        if self.health == 0:
+        if self.health <= 0:
             self.game.enemies.remove(self)
             self.game.orcs.remove(self)
             self.game.all_sprites.remove(self)
@@ -300,7 +300,8 @@ class Orc(pygame.sprite.Sprite):
         if collisions:
             collisions[0].cooldown = 1
             # Deals damage
-            self.game.hero.hearts -= 1
+            if self.game.difficulty == "normal":
+                self.game.hero.hearts -= 1
 
     def animation(self):
         """Animates the orc sprite"""
@@ -368,11 +369,12 @@ class Fly(pygame.sprite.Sprite):
         if collisions:
             collisions[0].cooldown = 1
             # Deals damage
-            self.game.hero.hearts -= 1
+            if self.game.difficulty == "normal":
+                self.game.hero.hearts -= 1
 
     def died(self):
         """Checks if the fly died"""
-        if self.health == 0:
+        if self.health <= 0:
             self.game.enemies.remove(self)
             self.game.flies.remove(self)
             self.game.all_sprites.remove(self)
@@ -521,7 +523,10 @@ class Arrow(pygame.sprite.Sprite):
         self.acceleration = vector(0,0)
         self.rect = self.image.get_rect()
         self.start_timer = 0
-        self.damage = 100
+        if self.game.difficulty == "god":
+            self.damage = 1000
+        elif self.game.difficulty == "normal":
+            self.damage = 100
         self.hit = False
 
     def update(self):
@@ -659,7 +664,8 @@ class Spikes(pygame.sprite.Sprite):
         # Landed on a spike
         if collisions:
             # Deals damage
-            self.game.hero.hearts -= 3
+            if self.game.difficulty == "normal":
+                self.game.hero.hearts -= 3
 
     def load_images(self):
         """Loads in image for the spikes"""

@@ -166,6 +166,28 @@ class Game():
             pygame.display.update()
             time.sleep(1.5) # Stops the program for 1.5 seconds
 
+    def difficulty_screen(self):
+        """Lets the player pick the game difficulty"""
+        self.screen.fill(LIGHT_GREEN) # Makes the windows background green
+        self.write("Select The Game Difficulty!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
+        self.god_mode = Button(LIGHT_GREEN_2, WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", self)
+        self.normal_mode = Button(LIGHT_GREEN_2, WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", self)
+        self.god_mode.draw(self.screen)
+        self.normal_mode.draw(self.screen)
+        pygame.display.update()
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                position = pygame.mouse.get_pos()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.god_mode.mouse_over(position):
+                        self.difficulty = "god"
+                        waiting = False
+                    elif self.normal_mode.mouse_over(position):
+                        self.difficulty = "normal"
+                        waiting = False
+
     def wait(self):
         """Waits for user input"""
         waiting = True
@@ -183,6 +205,7 @@ class Game():
 
 game = Game() # Creates game object
 game.start_screen()
+game.difficulty_screen()
 # Continues creating new games until the game.running variable is set to False
 while game.running:
     game.level_transition()

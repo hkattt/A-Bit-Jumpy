@@ -89,3 +89,31 @@ class Key_Display(Display):
     def load_images(self):
         """Loads in images for key animation"""
         self.keys = [pygame.image.load("key_empty.png"), pygame.image.load("key_full.png")]
+
+class Button():
+    """Button object"""
+    def __init__(self, colour, x, y, width, height, text, game):
+        """Initiates button"""
+        self.game = game
+        self.colour = colour
+        self.x = int(x - width / 2)
+        self.y = int(y - height / 2)
+        self.width = width
+        self.height = height
+        self.text = text
+    
+    def draw(self, surface):
+        """Draws the button onto the display window"""
+        pygame.draw.rect(surface, BLACK, (self.x - 2, self.y - 2, self.width + 4, self.height + 4), 0)
+        pygame.draw.rect(surface, self.colour, (self.x, self.y, self.width, self.height), 0)
+
+        if self.text != "":
+            self.game.write(self.text, BLACK, 25, int(self.x + self.width / 2), int(self.y + self.height / 2))
+
+    def mouse_over(self, position):
+        """Checks if the mouse is over the button"""
+        if position[0] > self.x and position[0] < self.x + self.width:
+            if position[1] > self.y and position[1] < self.y + self.height:
+                return True
+        return False
+

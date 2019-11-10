@@ -32,7 +32,7 @@ class Hero(pygame.sprite.Sprite):
         self.keys = []
         self.hearts = 3
         self.dead = False
-        self.coins = 0
+        self.coins = self.game.hero_coins
     
     def update(self):
         """Upadtes the hero object"""
@@ -200,7 +200,7 @@ class Orc(pygame.sprite.Sprite):
         self.left = True
         self.right = False
         self.spawner = spawner
-        self.attack_cooldown = 0
+        self.cooldown = 0
 
     def wall_collisions(self):
         """Checks if Orc collided with a wall"""
@@ -240,6 +240,8 @@ class Orc(pygame.sprite.Sprite):
 
     def update(self):
         """Updates the orc sprite"""
+        print(self.cooldown, "cooldown")
+        print(self.game.hero.hearts, "hearts")
         self.animation()
         self.move()
         self.wall_collisions()
@@ -249,6 +251,7 @@ class Orc(pygame.sprite.Sprite):
     
     def died(self):
         """Checks if the orc died"""
+        #print(self.attack_cooldown, "die")
         if self.health == 0:
             self.game.enemies.remove(self)
             self.game.orcs.remove(self)
@@ -262,7 +265,7 @@ class Orc(pygame.sprite.Sprite):
         # Moves towards the player (hero) is they are on the screen display and are on the same platform
         if abs(self.game.hero.position.x - self.position.x) < 1024 and abs(self.game.hero.position.y - self.position.y) < 100:
             # Moves to the right
-            if self.game.hero.position.x > self.position.x: 
+            if self.game.hero.rect.centerx > self.position.x: 
                 self.acceleration.x = ORC_ACC
             # Moves to the left
             else:
@@ -278,25 +281,27 @@ class Orc(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
 
     def can_attack(self):
-        """Checks if the attack cooldown is over"""
-        if self.attack_cooldown > 0:
-            self.attack_cooldown += 1
-        if self.attack_cooldown > 30:
-            self.attack_cooldown = 0
-        if self.attack_cooldown == 0:
+        """Checks if the attack cool is over"""
+        if self.cooldown > 0:
+            self.cooldown += 1
+        if self.cooldown  > 30:
+            self.cooldown = 0
+        if self.cooldown == 0:
             return True
         return False
 
     def attack(self):
         """Attacks the player"""
-        # Attacks if the two sprites collide
+        # Attacks if the two sprite collide
         collisions = pygame.sprite.spritecollide(self.game.hero, self.game.orcs, False, pygame.sprite.collide_mask)
         if collisions:
-            self.attack_cooldown = 1
+            self.cooldown = 1
+            # Deals damage
             self.game.hero.hearts -= 1
 
     def animation(self):
         """Animates the orc sprite"""
+        #print(self.attack_cooldown, "ani")
         current = pygame.time.get_ticks()
         if current - self.previous_U > 350: # Determines the animation speed
             self.previous_U = current
@@ -312,6 +317,7 @@ class Orc(pygame.sprite.Sprite):
         """Loads in images for Orc sprite animation"""
         self.walking_left = [pygame.image.load("orc_walking_left_1.png"), pygame.image.load("orc_walking_left_2.png"), pygame.image.load("orc_walking_left_3.png"), pygame.image.load("orc_walking_left_4.png"), pygame.image.load("orc_walking_left_5.png"), pygame.image.load("orc_walking_left_6.png"), pygame.image.load("orc_walking_left_7.png"), pygame.image.load("orc_walking_left_8.png"), pygame.image.load("orc_walking_left_9.png")]
         self.walking_right = [pygame.image.load("orc_walking_right_1.png"), pygame.image.load("orc_walking_right_2.png"), pygame.image.load("orc_walking_right_3.png"), pygame.image.load("orc_walking_right_4.png"), pygame.image.load("orc_walking_right_5.png"), pygame.image.load("orc_walking_right_6.png"), pygame.image.load("orc_walking_right_7.png"), pygame.image.load("orc_walking_right_8.png"), pygame.image.load("orc_walking_right_9.png")]
+        self.dead = pygame.image.load("orc_dead_1.png")
 
 class Fly(pygame.sprite.Sprite):
     """Fly enemy object"""
@@ -332,12 +338,34 @@ class Fly(pygame.sprite.Sprite):
         self.previous_U = 0
         self.left = True
         self.right = False
+        self.cooldown = 0
 
     def update(self):
         """Updates the fly sprite"""
         self.animation()
         self.move()
+        if self.can_attack():
+            self.attack()
         self.died()
+
+    def can_attack(self):
+        """Checks if the attack cool is over"""
+        if self.cooldown > 0:
+            self.cooldown += 1
+        if self.cooldown  > 30:
+            self.cooldown = 0
+        if self.cooldown == 0:
+            return True
+        return False
+
+    def attack(self):
+        """Attacks the player"""
+        # Attacks if the two sprite collide
+        collisions = pygame.sprite.spritecollide(self.game.hero, self.game.flies, False, pygame.sprite.collide_mask)
+        if collisions:
+            self.cooldown = 1
+            # Deals damage
+            self.game.hero.hearts -= 1
 
     def died(self):
         """Checks if the fly died"""
@@ -764,6 +792,7 @@ class Coin(pygame.sprite.Sprite):
         if collisions:
             # Hero gets the coin
             self.game.hero.coins += 1
+            self.game.hero_coins += 1
             self.game.all_sprites.remove(collisions[0])
             self.game.coins.remove(collisions[0])
 

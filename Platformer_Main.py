@@ -23,6 +23,7 @@ class Game():
         self.clock = pygame.time.Clock()
         self.running = True
         self.level = 1
+        self.hero_coins = 0
 
     def load_map(self):
         """Loads in map (level)"""

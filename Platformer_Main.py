@@ -272,6 +272,7 @@ class Town():
         self.town_blocks = pygame.sprite.Group()
         self.path_blocks = pygame.sprite.Group()
         self.town_doors = pygame.sprite.Group()
+        self.decorations = pygame.sprite.Group()
         # Cycles through tile map array
         for row, tiles in enumerate(self.town_map.tile_town):
             for column, tile in enumerate(tiles):
@@ -284,6 +285,9 @@ class Town():
                     self.door = Town_Door(column, row, self)
                 elif tile[0] == "d":
                     self.town_path = Town_Path(column, row, tile, self)
+                elif tile[0] == "b":
+                    self.town_block = Town_Terrain(column, row, "g", self)
+                    self.decoration = Decorations(column, row, tile, self)
                 else:
                     self.town_block = Town_Terrain(column, row, tile, self)
         # Creates camera
@@ -315,6 +319,8 @@ class Town():
         for sprite in self.path_blocks:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.town_doors:
+            self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.decorations:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         self.game.screen.blit(self.hero.image, self.camera.move_sprite(self.hero))
         pygame.display.update()

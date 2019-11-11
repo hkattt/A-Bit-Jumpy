@@ -950,13 +950,6 @@ class Town_Terrain(pygame.sprite.Sprite):
         # Different image depending on the block type
         if type == "g":
             self.image = self.grass
-        elif type[0] == "b":
-            if type[1] == "1":
-                self.image = self.bush[0]
-            if type[1] == "2":
-                self.image = self.bush[1]
-            if type[1] == "3":
-                self.image = self.bush[2]
         elif type[0] == "w":
             if type[1:] == "tl":
                 self.image = self.water[0]
@@ -984,6 +977,33 @@ class Town_Terrain(pygame.sprite.Sprite):
         """Loads in images for town environment"""
         self.grass = pygame.image.load("town_grass.png")
         self.water = [pygame.image.load("water_tl.png"), pygame.image.load("water_tm.png"), pygame.image.load("water_tr.png"), pygame.image.load("water_ml.png"), pygame.image.load("water_mm.png"), pygame.image.load("water_mr.png"), pygame.image.load("water_bl.png"), pygame.image.load("water_bm.png"), pygame.image.load("water_br.png")]
+
+class Decorations(pygame.sprite.Sprite):
+    """Decorations in the town"""
+    def __init__(self, x, y, type, town):
+        """Initiates decorations"""
+        self.groups = town.all_sprites, town.decorations # Town decorations groups
+        # Initiates sprite class
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.x = x
+        self.y = y
+        self.type = type
+        self.load_images()
+        # Different image depending on the block type
+        if type[0] == "b":
+            if type[1] == "1":
+
+                self.image = self.bush[0]
+            if type[1] == "2":
+                self.image = self.bush[1]
+            if type[1] == "3":
+                self.image = self.bush[2]
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x * TILE_SIZE
+        self.rect.y = self.y * TILE_SIZE
+
+    def load_images(self):
+        """Loads in images for decoration objects"""
         self.bush = [pygame.image.load("bush_1.png"), pygame.image.load("bush_2.png"), pygame.image.load("bush_3.png")]
 
 class Town_Path(pygame.sprite.Sprite):

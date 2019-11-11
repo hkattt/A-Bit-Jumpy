@@ -249,24 +249,30 @@ class Game():
 class Town():
     """Town object"""
     def __init__(self, game):
+        """Initiates town object"""
         self.game = game
         self.clock = pygame.time.Clock()
 
     def load_town(self):
-        """Loads in town"""
+        """Loads in town map (used to build the town)"""
         self.town_map = Town_Map()
 
     def update(self):
-         self.all_sprites.update()
-         self.camera.update(self.hero)
+        """Updates the town window"""
+        self.all_sprites.update()
+        # Camera follows the hero sprite
+        self.camera.update(self.hero)
     
     def new(self):
+        """Creates new town"""
+        # Loads in the town map
         self.load_town()
+        # Creates sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.town_blocks = pygame.sprite.Group()
         self.path_blocks = pygame.sprite.Group()
         self.town_doors = pygame.sprite.Group()
-        # Cycles through map array
+        # Cycles through tile map array
         for row, tiles in enumerate(self.town_map.tile_town):
             for column, tile in enumerate(tiles):
                 # Creates object based on the list items (string)
@@ -280,10 +286,12 @@ class Town():
                     self.town_path = Town_Path(column, row, tile, self)
                 else:
                     self.town_block = Town_Terrain(column, row, tile, self)
+        # Creates camera
         self.camera = Camera(self.town_map.width, self.town_map.height)
         self.run()
     
     def run(self):
+        """Runs the town game loop"""
         self.playing = True
         while self.playing:
             self.clock.tick(FPS)
@@ -292,6 +300,7 @@ class Town():
             self.paint()
 
     def events(self):
+        """Town loop events"""
         for event in pygame.event.get():
             # Checks if the user wants to quit the game
             if event.type == pygame.QUIT:
@@ -300,7 +309,7 @@ class Town():
                 self.running = False
 
     def paint(self):
-        self.game.screen.fill(BLACK)
+        """Draws the sprites onto the display window"""
         for sprite in self.town_blocks:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.path_blocks:

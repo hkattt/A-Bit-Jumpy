@@ -867,6 +867,7 @@ class Coin(pygame.sprite.Sprite):
 class Town_Hero(pygame.sprite.Sprite):
     """Town hero"""
     def __init__(self, x, y, town):
+        """Initiates town hero"""
         self.groups = town.all_sprites # Hero groups
         # Initiates the sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -878,14 +879,17 @@ class Town_Hero(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position
         self.velocity = vector(0, 0)
         self.acceleration = vector(0, 0)
+        self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
 
     def update(self):
+        """Updates hero sprite"""
         #self.animation()
         self.get_keys()
         self.move()
         self.collision()
 
     def get_keys(self):
+        """Gets key events from the user"""
         self.acceleration = vector(0, 0)
         KEYS = pygame.key.get_pressed()
         # Moving left
@@ -901,6 +905,8 @@ class Town_Hero(pygame.sprite.Sprite):
             self.acceleration.y = ACC
  
     def move(self):
+        """Moves the sprite"""
+        # Friction
         self.acceleration += self.velocity * FRIC
         # Equations of motion
         self.velocity += self.acceleration
@@ -910,6 +916,7 @@ class Town_Hero(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.position.x, self.position.y
 
     def collision(self):
+        """Checks for collisions (if the player went off the dirt track)"""
         collisions = pygame.sprite.spritecollide(self.town.hero, self.town.town_blocks, False)
         if collisions:
             if self.velocity.x > 0:
@@ -926,18 +933,21 @@ class Town_Hero(pygame.sprite.Sprite):
                 self.velocity.y = 0
 
     def load_images(self):
+        """Loads in images for hero sprite animation"""
         self.standing = [pygame.image.load("hero_standing_1.png"), pygame.image.load("hero_standing_2.png"), pygame.image.load("hero_standing_3.png"), pygame.image.load("hero_standing_4.png"), pygame.image.load("hero_standing_5.png"), pygame.image.load("hero_standing_6.png"), pygame.image.load("hero_standing_7.png")]
 
 class Town_Terrain(pygame.sprite.Sprite):
     """Town environment"""
     def __init__(self, x, y, type, town):
-        self.groups = town.all_sprites, town.town_blocks 
+        """Initiates town terrain"""
+        self.groups = town.all_sprites, town.town_blocks # Town terrain groups
         # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x
         self.y = y
         self.type = type
         self.load_images()
+        # Different image depending on the block type
         if type == "g":
             self.image = self.grass
         elif type[0] == "b":
@@ -979,13 +989,15 @@ class Town_Terrain(pygame.sprite.Sprite):
 class Town_Path(pygame.sprite.Sprite):
     """Town path"""
     def __init__(self, x, y, type, town):
-        self.groups = town.all_sprites, town.path_blocks # Environment block groups
+        """Initiates town path"""
+        self.groups = town.all_sprites, town.path_blocks # Path groups
         # Initiates sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x
         self.y = y
         self.type = type
         self.load_images()
+        # Different image depending on the block type
         if type[1:] == "tl":
             self.image = self.dirt[0]
         elif type[1:] == "tm":
@@ -1014,6 +1026,7 @@ class Town_Path(pygame.sprite.Sprite):
 class Town_Door(pygame.sprite.Sprite):
     """Door to move into the platformer level"""
     def __init__(self, x, y, town):
+        """Initiates the town door"""
         self.groups = town.all_sprites, town.town_doors
         # Initiates the sprite class
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -1026,23 +1039,29 @@ class Town_Door(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
 
     def update(self):
+        """Updates the town door"""
         self.animation()
         if self.go_to_game():
             self.town.playing = False
 
     def go_to_game(self):
+        """Checks if the player wants to go back into the game"""
         collisions = pygame.sprite.spritecollide(self.town.hero, self.town.town_doors, False, pygame.sprite.collide_mask)
         if collisions:
             return True
         return False
 
     def animation(self):
+        """Animates the town door"""
         collisions = pygame.sprite.spritecollide(self.town.hero, self.town.town_doors, False)
+        # Open if the hero is standing on it
         if collisions:
             self.image = self.open
+        # Closed if the hero is not standing on it
         else:
             self.image = self.closed
 
     def load_images(self):
+        """Loads in iamges for door animation"""
         self.open = pygame.image.load("town_door_open.png")
         self.closed = pygame.image.load("town_door_closed.png")

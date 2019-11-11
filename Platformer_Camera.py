@@ -20,6 +20,20 @@ class Map():
         self.width = self.tile_width * TILE_SIZE
         self.height = self.tile_height * TILE_SIZE
 
+class Town_Map():
+    """Town object"""
+    def __init__(self):
+        """Initiates Town and creates town list"""
+        self.tile_town = []
+        # Creates town
+        for line in town_map:
+            self.tile_town.append(line)
+        
+        self.tile_width = len(self.tile_town[0])
+        self.tile_height = len(self.tile_town)
+        self.width = self.tile_width * TILE_SIZE
+        self.height = self.tile_height * TILE_SIZE
+
 class Camera():
     """Camera object"""
     def __init__(self, width, height):

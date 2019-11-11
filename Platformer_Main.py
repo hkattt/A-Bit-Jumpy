@@ -227,6 +227,11 @@ class Game():
                         else:
                             self.normal_mode.colour = LIGHT_GREEN[1]
 
+    def town_level(self):
+        """Creates town for player to walk around in"""
+        self.town = Town(self)
+        self.town.new()
+
     def wait(self):
         """Waits for user input"""
         waiting = True
@@ -241,12 +246,76 @@ class Game():
                 if event.type == pygame.KEYUP:
                     waiting = False
 
+class Town():
+    """Town object"""
+    def __init__(self, game):
+        self.game = game
+        self.clock = pygame.time.Clock()
+
+    def load_town(self):
+        """Loads in town"""
+        self.town_map = Town_Map()
+
+    def update(self):
+         self.all_sprites.update()
+         self.camera.update(self.hero)
+    
+    def new(self):
+        self.load_town()
+        self.all_sprites = pygame.sprite.Group()
+        self.town_blocks = pygame.sprite.Group()
+        self.path_blocks = pygame.sprite.Group()
+        self.town_doors = pygame.sprite.Group()
+        # Cycles through map array
+        for row, tiles in enumerate(self.town_map.tile_town):
+            for column, tile in enumerate(tiles):
+                # Creates object based on the list items (string)
+                if tile == "P":
+                    self.town_path = Town_Path(column, row, "dtm", self)
+                    self.hero = Town_Hero(column, row, self)
+                elif tile == "D":
+                    self.town_path = Town_Path(column, row, "dtr", self)
+                    self.door = Town_Door(column, row, self)
+                elif tile[0] == "d":
+                    self.town_path = Town_Path(column, row, tile, self)
+                else:
+                    self.town_block = Town_Terrain(column, row, tile, self)
+        self.camera = Camera(self.town_map.width, self.town_map.height)
+        self.run()
+    
+    def run(self):
+        self.playing = True
+        while self.playing:
+            self.clock.tick(FPS)
+            self.events()
+            self.update()
+            self.paint()
+
+    def events(self):
+        for event in pygame.event.get():
+            # Checks if the user wants to quit the game
+            if event.type == pygame.QUIT:
+                if self.playing:
+                    self.playing = False
+                self.running = False
+
+    def paint(self):
+        self.game.screen.fill(BLACK)
+        for sprite in self.town_blocks:
+            self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.path_blocks:
+            self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.town_doors:
+            self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        self.game.screen.blit(self.hero.image, self.camera.move_sprite(self.hero))
+        pygame.display.update()
 
 game = Game() # Creates game object
 game.start_screen()
 game.difficulty_screen()
 # Continues creating new games until the game.running variable is set to False
 while game.running:
+    game.town_level()
     game.level_transition()
     game.new()
     game.end_screen()

@@ -60,7 +60,7 @@ class Game():
                     elif tile == "O":
                         self.orc = Orc(column, row, self, None)
                     elif tile == "F":
-                        Fly(column, row, self)
+                        self.fly = Fly(column, row, self)
                     elif tile == "c":
                         self.coin = Coin(column, row, self)
                     elif tile == "S":
@@ -123,8 +123,32 @@ class Game():
         self.screen.fill(SKY_BLUE) # Makes the display windows background blue
 
         # Moves every sprite object based on the camera position, then displays it onto the window
-        for sprite in self.all_sprites:
+        # Every group is drawn seperately such that certain sprites do not overlap with one another
+        for sprite in self.environment:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.doors:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.jump_pads:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.spikes:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.arrows:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.keys:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.coins:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.spawners:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.orcs:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.flies:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        self.screen.blit(self.hero.image, self.camera.move_sprite(self.hero))
+
+
+
+
         # Displays the players attributes onto the screen
         for sprite in self.display_objects:
             self.screen.blit(sprite.image, sprite)
@@ -168,35 +192,40 @@ class Game():
 
     def difficulty_screen(self):
         """Lets the player pick the game difficulty"""
-        self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
-        self.write("Select The Game Difficulty!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
-        self.god_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", self)
-        self.normal_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", self)
-        waiting = True
-        while waiting:
-            self.god_mode.draw(self.screen)
-            self.normal_mode.draw(self.screen)
-            pygame.display.update()
-            for event in pygame.event.get():
-                position = pygame.mouse.get_pos()
+        if self.running:
+            self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
+            self.write("Select The Game Difficulty!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
+            self.god_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", self)
+            self.normal_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", self)
+            waiting = True
+            while waiting:
+                self.god_mode.draw(self.screen)
+                self.normal_mode.draw(self.screen)
+                pygame.display.update()
+                for event in pygame.event.get():
+                    position = pygame.mouse.get_pos()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.god_mode.mouse_over(position):
-                        self.difficulty = "god"
+                    if event.type == pygame.QUIT:
                         waiting = False
-                    elif self.normal_mode.mouse_over(position):
-                        self.difficulty = "normal"
-                        waiting = False
-                
-                if event.type == pygame.MOUSEMOTION:
-                    if self.god_mode.mouse_over(position):
-                        self.god_mode.colour = LIGHT_GREEN[2]
-                    else:
-                        self.god_mode.colour = LIGHT_GREEN[1]
-                    if self.normal_mode.mouse_over(position):
-                        self.normal_mode.colour = LIGHT_GREEN[2]
-                    else:
-                        self.normal_mode.colour = LIGHT_GREEN[1]
+                        self.running = False
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if self.god_mode.mouse_over(position):
+                            self.difficulty = "god"
+                            waiting = False
+                        elif self.normal_mode.mouse_over(position):
+                            self.difficulty = "normal"
+                            waiting = False
+                    
+                    if event.type == pygame.MOUSEMOTION:
+                        if self.god_mode.mouse_over(position):
+                            self.god_mode.colour = LIGHT_GREEN[2]
+                        else:
+                            self.god_mode.colour = LIGHT_GREEN[1]
+                        if self.normal_mode.mouse_over(position):
+                            self.normal_mode.colour = LIGHT_GREEN[2]
+                        else:
+                            self.normal_mode.colour = LIGHT_GREEN[1]
 
     def wait(self):
         """Waits for user input"""

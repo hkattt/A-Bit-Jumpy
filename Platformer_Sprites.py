@@ -932,20 +932,28 @@ class Town_Hero(pygame.sprite.Sprite):
         """Animates the hero sprite"""
         current = pygame.time.get_ticks()
         # Checks if the player is running
-        if current - self.previous_U > 100: # Animation speed
+        if current - self.previous_U > 200: # Animation speed
             self.previous_U = current
             self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
             # Moving right
-            if self.right: 
-                self.image = self.walking_right[self.frame_count]
-                # Moving left
-            elif self.left:
-                self.image = self.walking_left[self.frame_count]
-            elif self.down:
-                self.image = self.walking_down[self.frame_count]
-            elif self.up:
-                self.image = self.walking_up[self.frame_count]
-                
+            print(abs(self.velocity.x))
+            print(abs(self.velocity.y))
+            if abs(self.velocity.x) > 0.2:
+                if self.right:
+                    print("right")
+                    self.image = self.walking_right[self.frame_count]
+                    # Moving left
+                elif self.left:
+                    print("left")
+                    self.image = self.walking_left[self.frame_count]
+            elif abs(self.velocity.y) > 0.2:
+                if self.down:
+                    print("down")
+                    self.image = self.walking_down[self.frame_count]
+                elif self.up:
+                    print("up")
+                    self.image = self.walking_up[self.frame_count]
+            
         # Creates an image mask for collisions
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -990,21 +998,21 @@ class Town_Terrain(pygame.sprite.Sprite):
         elif type[0] == "w":
             if type[1:] == "tl":
                 self.image = self.water[0]
-            if type[1:] == "tm":
+            elif type[1:] == "tm":
                 self.image = self.water[1]
-            if type[1:] == "tr":
+            elif type[1:] == "tr":
                 self.image = self.water[2]
-            if type[1:] == "ml":
+            elif type[1:] == "ml":
                 self.image = self.water[3]
-            if type[1:] == "mm":
+            elif type[1:] == "mm":
                 self.image = self.water[4]
-            if type[1:] == "mr":
+            elif type[1:] == "mr":
                 self.image = self.water[5]
-            if type[1:] == "bl":
+            elif type[1:] == "bl":
                 self.image = self.water[6]
-            if type[1:] == "bm":
+            elif type[1:] == "bm":
                 self.image = self.water[7]
-            if type[1:] == "br":
+            elif type[1:] == "br":
                 self.image = self.water[8]
         self.rect = self.image.get_rect()
         self.rect.x = self.x * TILE_SIZE
@@ -1029,11 +1037,10 @@ class Decorations(pygame.sprite.Sprite):
         # Different image depending on the block type
         if type[0] == "b":
             if type[1] == "1":
-
                 self.image = self.bush[0]
-            if type[1] == "2":
+            elif type[1] == "2":
                 self.image = self.bush[1]
-            if type[1] == "3":
+            elif type[1] == "3":
                 self.image = self.bush[2]
         self.rect = self.image.get_rect()
         self.rect.x = self.x * TILE_SIZE

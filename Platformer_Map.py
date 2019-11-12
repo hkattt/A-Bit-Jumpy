@@ -39,9 +39,9 @@ town_map = [["g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g
             ["g", "b1", "b3", "g", "g", "g", "g", "g", "g", "g", "g", "g", "dtl", "dtm", "D", "g", "g"],
             ["g", "wtl", "wtm", "wtm", "wtr", "g", "g", "g", "g", "g", "g", "g", "dml", "dmm", "dmr", "g", "g"],
             ["g", "wml", "wmm", "wmm", "wmr", "dtl", "dtm", "dtm", "dtm", "dtm", "dtm", "dtm", "dmm", "dmm", "dmr", "g", "g"],
-            ["g", "wbl", "wbm", "wbm", "wbr", "dml", "dmm", "dbm", "dbm", "dbm", "dbm", "dbm", "dbm", "dbm", "dbr", "g", "g"],
-            ["g", "g", "g", "g", "g", "dml", "dmr", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g"],
-            ["g", "g", "b3", "b2", "g", "dml", "dmr", "g", "b1", "b3", "g", "g", "g", "g", "g", "g", "g"],
-            ["P", "dtm", "dtm", "dtm", "dtm", "dmm", "dmr", "g", "b2", "g", "g", "g", "g", "g", "g", "g", "g"],
-            ["dbm", "dbm", "dbm", "dbm", "dbm", "dbm", "dbr", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g"],
-            ["g", "g", "g", "g", "b1", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "g"]]
+            ["g", "wbl", "wbm", "wbm", "wbr", "dml", "dmm", "dbm", "dbm", "dbm", "dbm", "dbm", "dbm", "dmm", "dmr", "g", "g"],
+            ["g", "g", "g", "g", "g", "dml", "dmr", "g", "g", "g", "rb", "g", "g", "dml", "dmr", "g", "g"],
+            ["g", "g", "b3", "b2", "g", "dml", "dmr", "g", "g", "g", "rf", "g", "g", "dml", "dmr", "g", "g"],
+            ["P", "dtm", "dtm", "dtm", "dtm", "dmm", "dmr", "g", "g", "dtl", "rd", "dtr", "g", "dml", "dmr", "g", "g"],
+            ["dbm", "dbm", "dbm", "dbm", "dbm", "dbm", "dbr", "g", "g", "dml", "dmm", "dmm", "dtm", "dmm", "dmr", "g", "g"],
+            ["g", "g", "g", "g", "b1", "g", "g", "g", "g", "dbl", "dbm", "dbm", "dbm", "dbm", "dbr", "g", "g"]]

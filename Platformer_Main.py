@@ -264,12 +264,12 @@ class Town():
         self.camera.update(self.hero)
     
     def new(self):
-        
         """Creates new town"""
         # Loads in the town map
         self.load_town()
         # Creates sprite groups
         self.all_sprites = pygame.sprite.Group()
+        self.building_tiles = pygame.sprite.Group()
         self.town_blocks = pygame.sprite.Group()
         self.path_blocks = pygame.sprite.Group()
         self.town_doors = pygame.sprite.Group()
@@ -278,17 +278,33 @@ class Town():
         for row, tiles in enumerate(self.town_map.tile_town):
             for column, tile in enumerate(tiles):
                 # Creates object based on the list items (string)
+                # Player
                 if tile == "P":
                     self.town_path = Town_Path(column, row, "dtm", self)
                     self.hero = Town_Hero(column, row, self)
+                # Door
                 elif tile == "D":
                     self.town_path = Town_Path(column, row, "dtr", self)
                     self.door = Town_Door(column, row, self)
+                # Shop
+                elif tile[0] == "r":
+                    if tile[1] != "d":
+                        self.town_block = Town_Terrain(column, row, "g", self)
+                    # Front of the roof
+                    if tile[1] == "f":
+                        self.building_tile = Town_Shop(column, row, "rt", self)
+                    # Door frame
+                    if tile[1] == "d":
+                        self.building_tile = Town_Shop(column, row, "rD", self)
+                    self.building_tile = Town_Shop(column, row, tile, self)
+                # Path
                 elif tile[0] == "d":
                     self.town_path = Town_Path(column, row, tile, self)
+                # Decorations
                 elif tile[0] == "b":
                     self.town_block = Town_Terrain(column, row, "g", self)
                     self.decoration = Decorations(column, row, tile, self)
+                # Terrain
                 else:
                     self.town_block = Town_Terrain(column, row, tile, self)
         # Creates camera
@@ -318,6 +334,8 @@ class Town():
         for sprite in self.town_blocks:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.path_blocks:
+            self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.building_tiles:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.town_doors:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))

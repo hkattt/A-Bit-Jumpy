@@ -1041,13 +1041,12 @@ class Decorations(pygame.sprite.Sprite):
         self.type = type
         self.load_images()
         # Different image depending on the block type
-        if type[0] == "b":
-            if type[1] == "1":
-                self.image = self.bush[0]
-            elif type[1] == "2":
-                self.image = self.bush[1]
-            elif type[1] == "3":
-                self.image = self.bush[2]
+        if type[1] == "1":
+            self.image = self.bush[0]
+        elif type[1] == "2":
+            self.image = self.bush[1]
+        elif type[1] == "3":
+            self.image = self.bush[2]
         self.rect = self.image.get_rect()
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
@@ -1135,3 +1134,48 @@ class Town_Door(pygame.sprite.Sprite):
         """Loads in iamges for door animation"""
         self.open = pygame.image.load("town_door_open.png")
         self.closed = pygame.image.load("town_door_closed.png")
+
+class Town_Shop(pygame.sprite.Sprite):
+    """Shops in which player can buy upgrades"""
+    def __init__(self, x, y, type, town):
+        self.groups = town.all_sprites, town.building_tiles
+        # Initiates the sprite class
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.town = town
+        self.load_images()
+        if type[1] == "f":
+            self.image = self.building[0]
+        elif type[1] == "m":
+            self.image = self.building[1]
+        elif type[1] == "b":
+            self.image = self.building[2]
+        elif type[1] == "t":
+            self.image = self.building[3]
+        elif type[1] == "d":
+            self.image = self.building[4]
+        elif type[1] == "D":
+            self.image = self.door[0]
+        self.type = type
+        self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.position
+        self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
+
+    def update(self):
+        self.animation()
+
+    def animation(self):
+        collisions = pygame.sprite.spritecollide(self.town.hero, self.town.building_tiles, False)
+        # Open if the hero is standing on it
+        if self.type == "rD":
+            if collisions:
+                if collisions[0] == self:
+                    self.image = self.door[1]
+                    # Closed if the hero is not standing on it
+            else:
+                self.image = self.door[0]
+    
+    def load_images(self):
+        """loads in images for building tiles"""
+        self.building = [pygame.image.load("roof_f.png"), pygame.image.load("roof_m.png"), pygame.image.load("roof_b.png"), pygame.image.load("roof_tile.png"), pygame.image.load("door_frame.png")]
+        self.door = [pygame.image.load("building_door_closed.png"), pygame.image.load("building_door_open.png")]

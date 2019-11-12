@@ -893,7 +893,6 @@ class Town_Hero(pygame.sprite.Sprite):
         self.get_keys()
         self.move()
         self.animation()
-        self.collision()
 
     def get_keys(self):
         """Gets key events from the user"""
@@ -907,10 +906,11 @@ class Town_Hero(pygame.sprite.Sprite):
         elif KEYS[pygame.K_RIGHT] or KEYS[pygame.K_d]:
             self.acceleration.x = ACC
             self.right, self.left, self.up, self.down = True, False, False, False
-        # Jump
+        # Moving up
         elif KEYS[pygame.K_UP] or KEYS[pygame.K_w]:
             self.acceleration.y = -ACC
             self.right, self.left, self.up, self.down = False, False, True, False
+        # Moving down
         elif KEYS[pygame.K_DOWN] or KEYS[pygame.K_s]:
             self.acceleration.y = ACC
             self.right, self.left, self.up, self.down = False, False, False, True
@@ -925,54 +925,60 @@ class Town_Hero(pygame.sprite.Sprite):
             self.velocity.x = 0
         if abs(self.velocity.y) < 0.2:
             self.velocity.y = 0
+        # Used to determine if the player stopped moving
+        if abs(self.velocity.x) < 0.2:
+            self.right, self.left = False, False
+        if abs(self.velocity.y) < 0.2:
+            self.up, self.down = False, False
         self.position += self.velocity + 0.5 * self.acceleration
-        self.rect.x, self.rect.y = self.position.x, self.position.y
+        self.rect.x = self.position.x
+        self.collision("x")
+        self.rect.y = self.position.y
+        self.collision("y")
     
     def animation(self):
         """Animates the hero sprite"""
         current = pygame.time.get_ticks()
         # Checks if the player is running
-        if current - self.previous_U > 200: # Animation speed
+        if current - self.previous_U > 150: # Animation speed
             self.previous_U = current
             self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
             # Moving right
-            print(abs(self.velocity.x))
-            print(abs(self.velocity.y))
-            if abs(self.velocity.x) > 0.2:
-                if self.right:
-                    print("right")
-                    self.image = self.walking_right[self.frame_count]
-                    # Moving left
-                elif self.left:
-                    print("left")
-                    self.image = self.walking_left[self.frame_count]
-            elif abs(self.velocity.y) > 0.2:
-                if self.down:
-                    print("down")
-                    self.image = self.walking_down[self.frame_count]
-                elif self.up:
-                    print("up")
-                    self.image = self.walking_up[self.frame_count]
+            if self.right:
+                self.image = self.walking_right[self.frame_count]
+            # Moving left
+            elif self.left:
+                self.image = self.walking_left[self.frame_count]
+            # Moving down
+            elif self.down:
+                self.image = self.walking_down[self.frame_count]
+            # Moving up
+            elif self.up:
+                self.image = self.walking_up[self.frame_count]
             
         # Creates an image mask for collisions
         self.mask = pygame.mask.from_surface(self.image)
 
-    def collision(self):
+    def collision(self, direction):
         """Checks for collisions (if the player went off the dirt track)"""
-        collisions = pygame.sprite.spritecollide(self.town.hero, self.town.town_blocks, False)
-        if collisions:
-            if self.velocity.x > 0:
-                self.position.x = collisions[0].rect.left - self.rect.width
+        if direction == "x":
+            collisions = pygame.sprite.spritecollide(self.town.hero, self.town.town_blocks, False)
+            if collisions:
+                if self.velocity.x > 0:
+                    self.position.x = collisions[0].rect.left - self.rect.width
+                if self.velocity.x < 0:
+                    self.position.x = collisions[0].rect.right
                 self.velocity.x = 0
-            elif self.velocity.x < 0:
-                self.position.x = collisions[0].rect.right
-                self.velocity.x = 0
-            elif self.velocity.y > 0:
-                self.position.y = collisions[0].rect.top - self.rect.height
+                self.rect.x = self.position.x
+        elif direction == "y":
+            collisions = pygame.sprite.spritecollide(self.town.hero, self.town.town_blocks, False)
+            if collisions:
+                if self.velocity.y > 0:
+                    self.position.y = collisions[0].rect.top - self.rect.height
+                elif self.velocity.y < 0:
+                    self.position.y = collisions[0].rect.bottom
                 self.velocity.y = 0
-            elif self.velocity.y < 0:
-                self.position.y = collisions[0].rect.bottom
-                self.velocity.y = 0
+                self.rect.y = self.position.y
 
     def load_images(self):
         """Loads in images for hero sprite animation"""

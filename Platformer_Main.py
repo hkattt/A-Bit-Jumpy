@@ -264,6 +264,7 @@ class Town():
         self.camera.update(self.hero)
     
     def new(self):
+        
         """Creates new town"""
         # Loads in the town map
         self.load_town()

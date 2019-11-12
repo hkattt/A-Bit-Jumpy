@@ -873,12 +873,18 @@ class Town_Hero(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.town = town
         self.load_images()
-        self.image = self.standing[0]
+        self.image = self.walking_right[0]
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
         self.velocity = vector(0, 0)
         self.acceleration = vector(0, 0)
+        self.frame_count = 0
+        self.previous_U = 0
+        self.right = True
+        self.left = False
+        self.up = False
+        self.down = False
         self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
 
     def update(self):
@@ -886,6 +892,7 @@ class Town_Hero(pygame.sprite.Sprite):
         #self.animation()
         self.get_keys()
         self.move()
+        self.animation()
         self.collision()
 
     def get_keys(self):
@@ -895,14 +902,18 @@ class Town_Hero(pygame.sprite.Sprite):
         # Moving left
         if KEYS[pygame.K_LEFT] or KEYS[pygame.K_a]: 
             self.acceleration.x = -ACC
+            self.right, self.left, self.up, self.down = False, True, False, False
         # Moving right
         elif KEYS[pygame.K_RIGHT] or KEYS[pygame.K_d]:
             self.acceleration.x = ACC
+            self.right, self.left, self.up, self.down = True, False, False, False
         # Jump
         elif KEYS[pygame.K_UP] or KEYS[pygame.K_w]:
             self.acceleration.y = -ACC
+            self.right, self.left, self.up, self.down = False, False, True, False
         elif KEYS[pygame.K_DOWN] or KEYS[pygame.K_s]:
             self.acceleration.y = ACC
+            self.right, self.left, self.up, self.down = False, False, False, True
  
     def move(self):
         """Moves the sprite"""
@@ -912,8 +923,31 @@ class Town_Hero(pygame.sprite.Sprite):
         self.velocity += self.acceleration
         if abs(self.velocity.x) < 0.2:
             self.velocity.x = 0
+        if abs(self.velocity.y) < 0.2:
+            self.velocity.y = 0
         self.position += self.velocity + 0.5 * self.acceleration
         self.rect.x, self.rect.y = self.position.x, self.position.y
+    
+    def animation(self):
+        """Animates the hero sprite"""
+        current = pygame.time.get_ticks()
+        # Checks if the player is running
+        if current - self.previous_U > 100: # Animation speed
+            self.previous_U = current
+            self.frame_count = (self.frame_count + 1) % len(self.walking_left) 
+            # Moving right
+            if self.right: 
+                self.image = self.walking_right[self.frame_count]
+                # Moving left
+            elif self.left:
+                self.image = self.walking_left[self.frame_count]
+            elif self.down:
+                self.image = self.walking_down[self.frame_count]
+            elif self.up:
+                self.image = self.walking_up[self.frame_count]
+                
+        # Creates an image mask for collisions
+        self.mask = pygame.mask.from_surface(self.image)
 
     def collision(self):
         """Checks for collisions (if the player went off the dirt track)"""
@@ -934,7 +968,10 @@ class Town_Hero(pygame.sprite.Sprite):
 
     def load_images(self):
         """Loads in images for hero sprite animation"""
-        self.standing = [pygame.image.load("hero_standing_1.png"), pygame.image.load("hero_standing_2.png"), pygame.image.load("hero_standing_3.png"), pygame.image.load("hero_standing_4.png"), pygame.image.load("hero_standing_5.png"), pygame.image.load("hero_standing_6.png"), pygame.image.load("hero_standing_7.png")]
+        self.walking_right = [pygame.image.load("hero_walking_right_1.png"), pygame.image.load("hero_walking_right_2.png"), pygame.image.load("hero_walking_right_3.png"), pygame.image.load("hero_walking_right_4.png"), pygame.image.load("hero_walking_right_5.png"), pygame.image.load("hero_walking_right_6.png"), pygame.image.load("hero_walking_right_7.png"), pygame.image.load("hero_walking_right_8.png"), pygame.image.load("hero_walking_right_9.png")]
+        self.walking_left = [pygame.image.load("hero_walking_left_1.png"), pygame.image.load("hero_walking_left_2.png"), pygame.image.load("hero_walking_left_3.png"), pygame.image.load("hero_walking_left_4.png"), pygame.image.load("hero_walking_left_5.png"), pygame.image.load("hero_walking_left_6.png"), pygame.image.load("hero_walking_left_7.png"), pygame.image.load("hero_walking_left_8.png"), pygame.image.load("hero_walking_left_9.png")]
+        self.walking_up = [pygame.image.load("hero_walking_up_1.png"), pygame.image.load("hero_walking_up_2.png"), pygame.image.load("hero_walking_up_3.png"), pygame.image.load("hero_walking_up_4.png"), pygame.image.load("hero_walking_up_5.png"), pygame.image.load("hero_walking_up_6.png"), pygame.image.load("hero_walking_up_7.png"), pygame.image.load("hero_walking_up_8.png"), pygame.image.load("hero_walking_up_9.png")]
+        self.walking_down = [pygame.image.load("hero_walking_down_1.png"), pygame.image.load("hero_walking_down_2.png"), pygame.image.load("hero_walking_down_3.png"), pygame.image.load("hero_walking_down_4.png"), pygame.image.load("hero_walking_down_5.png"), pygame.image.load("hero_walking_down_6.png"), pygame.image.load("hero_walking_down_7.png"), pygame.image.load("hero_walking_down_8.png"), pygame.image.load("hero_walking_down_9.png")]
 
 class Town_Terrain(pygame.sprite.Sprite):
     """Town environment"""

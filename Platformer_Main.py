@@ -195,8 +195,8 @@ class Game():
         if self.running:
             self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
             self.write("Select The Game Difficulty!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
-            self.god_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", self)
-            self.normal_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", self)
+            self.god_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", 25, self)
+            self.normal_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", 25, self)
             waiting = True
             while waiting:
                 self.god_mode.draw(self.screen)
@@ -295,7 +295,7 @@ class Town():
                         self.building_tile = Town_Shop(column, row, "rt", self)
                     # Door frame
                     if tile[1] == "d":
-                        self.building_tile = Town_Shop(column, row, "rD", self)
+                        self.shop = Town_Shop(column, row, "rD", self)
                     self.building_tile = Town_Shop(column, row, tile, self)
                 # Path
                 elif tile[0] == "d":

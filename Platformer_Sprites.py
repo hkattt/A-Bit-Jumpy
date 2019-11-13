@@ -915,6 +915,9 @@ class Town_Hero(pygame.sprite.Sprite):
         elif KEYS[pygame.K_DOWN] or KEYS[pygame.K_s]:
             self.acceleration.y = ACC
             self.right, self.left, self.up, self.down = False, False, False, True
+        elif KEYS[pygame.K_LSHIFT] or KEYS[pygame.K_RSHIFT]:
+            if self.town.shop.can_shop():
+                self.town.shop.shop()
  
     def move(self):
         """Moves the sprite"""
@@ -1160,14 +1163,11 @@ class Town_Shop(pygame.sprite.Sprite):
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
-        self.leaving = False
         self.previous_U = 0
         self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
 
     def update(self):
         self.animation()
-        if self.can_shop():
-            self.shop()
 
     def animation(self):
         collisions = pygame.sprite.spritecollide(self.town.hero, self.town.building_tiles, False)
@@ -1181,26 +1181,23 @@ class Town_Shop(pygame.sprite.Sprite):
                 self.image = self.door[0]
 
     def can_shop(self):
-        if not self.leaving:
-            collisions = pygame.sprite.spritecollide(self.town.hero, self.town.building_tiles, False, pygame.sprite.collide_mask)
-            # Open if the hero is standing on it
-            if self.type == "rD":
-                if collisions:
-                    return True
-        else:
-            current = pygame.time.get_ticks()
-            if current - self.previous_U > 4500:
-                self.previous_U = current
-                self.leaving = False
+        collisions = pygame.sprite.spritecollide(self.town.hero, self.town.building_tiles, False, pygame.sprite.collide_mask)
+        # Open if the hero is standing on it
+        if self.type == "rD":
+            if collisions:
+                return True
         return False
 
     def shop(self):
         shopping = True
         screen_outline = pygame.draw.rect(self.town.game.screen, BLACK, ((WIDTH / 2) - WIDTH / 3, HEIGHT / 5, WIDTH / 1.5, HEIGHT / 1.5), 0)        
         screen = pygame.draw.rect(self.town.game.screen, WHITE, ((WIDTH / 2) + 2 - WIDTH / 3, (HEIGHT / 5) + 2, (WIDTH / 1.5) - 4, (HEIGHT / 1.5) - 4), 0)
-        self.armour = Button(GREY, WIDTH / 2, HEIGHT / 3, 200, 50, "Armour", self.town.game)
-        self.health = Button(GREY, WIDTH / 2, HEIGHT / 2, 200, 50, "Medicine", self.town.game)
+        self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 4, 250, 60, "Shop", 40, self.town.game)
+        self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 3, 200, 50, "Armour", 25, self.town.game)
+        self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Medicine", 25, self.town.game)
         while shopping:
+            position = pygame.mouse.get_pos()
+            self.shop_heading.draw(self.town.game.screen)
             self.armour.draw(self.town.game.screen)
             self.health.draw(self.town.game.screen)
             pygame.display.update()
@@ -1209,6 +1206,16 @@ class Town_Shop(pygame.sprite.Sprite):
                 if event.type == pygame.QUIT:
                     shopping = False
                     self.leaving = True
+
+                if event.type == pygame.MOUSEMOTION:
+                        if self.armour.mouse_over(position):
+                            self.armour.colour = GREY[1]
+                        else:
+                            self.armour.colour = GREY[0]
+                        if self.health.mouse_over(position):
+                            self.health.colour = GREY[1]
+                        else:
+                            self.health.colour = GREY[0]
 
         self.town.hero.rect.y += 64
 

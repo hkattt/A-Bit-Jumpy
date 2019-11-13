@@ -99,7 +99,7 @@ class Key_Display(Display):
 
 class Button():
     """Button object (was modified from button made by Tech With Tim, Youtube)"""
-    def __init__(self, colour, x, y, width, height, text, game):
+    def __init__(self, colour, x, y, width, height, text, text_size, game):
         """Initiates button"""
         self.game = game
         self.colour = colour
@@ -108,6 +108,7 @@ class Button():
         self.width = width
         self.height = height
         self.text = text
+        self.text_size = text_size
     
     def draw(self, surface):
         """Draws the button onto the display window"""
@@ -115,7 +116,7 @@ class Button():
         pygame.draw.rect(surface, self.colour, (self.x, self.y, self.width, self.height), 0)
 
         if self.text != "":
-            self.game.write(self.text, BLACK, 25, int(self.x + self.width / 2), int(self.y + self.height / 2))
+            self.game.write(self.text, BLACK, self.text_size, int(self.x + self.width / 2), int(self.y + self.height / 2))
 
     def mouse_over(self, position):
         """Checks if the mouse is over the button"""

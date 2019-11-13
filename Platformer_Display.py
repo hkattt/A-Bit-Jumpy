@@ -38,7 +38,6 @@ class Coin_Count(Display):
         elif self.game.hero.coins >= 10:
             self.coin_space = 82
         
-
     def load_images(self):
         """Loads in image for coin display"""
         self.coin = pygame.image.load("gold_coin.png")

@@ -5,6 +5,7 @@ import pygame
 import random
 # Imports settings file
 from Platformer_Settings import *
+from Platformer_Display import *
 vector = pygame.math.Vector2
 
 # Main game classes (for the platformer gameplay)
@@ -1159,10 +1160,14 @@ class Town_Shop(pygame.sprite.Sprite):
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.position
+        self.leaving = False
+        self.previous_U = 0
         self.mask = pygame.mask.from_surface(self.image) # Creates an image mask for collisions
 
     def update(self):
         self.animation()
+        if self.can_shop():
+            self.shop()
 
     def animation(self):
         collisions = pygame.sprite.spritecollide(self.town.hero, self.town.building_tiles, False)
@@ -1174,7 +1179,39 @@ class Town_Shop(pygame.sprite.Sprite):
                     # Closed if the hero is not standing on it
             else:
                 self.image = self.door[0]
-    
+
+    def can_shop(self):
+        if not self.leaving:
+            collisions = pygame.sprite.spritecollide(self.town.hero, self.town.building_tiles, False, pygame.sprite.collide_mask)
+            # Open if the hero is standing on it
+            if self.type == "rD":
+                if collisions:
+                    return True
+        else:
+            current = pygame.time.get_ticks()
+            if current - self.previous_U > 4500:
+                self.previous_U = current
+                self.leaving = False
+        return False
+
+    def shop(self):
+        shopping = True
+        screen_outline = pygame.draw.rect(self.town.game.screen, BLACK, ((WIDTH / 2) - WIDTH / 3, HEIGHT / 5, WIDTH / 1.5, HEIGHT / 1.5), 0)        
+        screen = pygame.draw.rect(self.town.game.screen, WHITE, ((WIDTH / 2) + 2 - WIDTH / 3, (HEIGHT / 5) + 2, (WIDTH / 1.5) - 4, (HEIGHT / 1.5) - 4), 0)
+        self.armour = Button(GREY, WIDTH / 2, HEIGHT / 3, 200, 50, "Armour", self.town.game)
+        self.health = Button(GREY, WIDTH / 2, HEIGHT / 2, 200, 50, "Medicine", self.town.game)
+        while shopping:
+            self.armour.draw(self.town.game.screen)
+            self.health.draw(self.town.game.screen)
+            pygame.display.update()
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    shopping = False
+                    self.leaving = True
+
+        self.town.hero.rect.y += 64
+
     def load_images(self):
         """loads in images for building tiles"""
         self.building = [pygame.image.load("roof_f.png"), pygame.image.load("roof_m.png"), pygame.image.load("roof_b.png"), pygame.image.load("roof_tile.png"), pygame.image.load("door_frame.png")]

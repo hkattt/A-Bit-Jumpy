@@ -1192,8 +1192,8 @@ class Town_Shop(pygame.sprite.Sprite):
         shopping = True
         screen_outline = pygame.draw.rect(self.town.game.screen, BLACK, ((WIDTH / 2) - WIDTH / 3, HEIGHT / 5, WIDTH / 1.5, HEIGHT / 1.5), 0)        
         screen = pygame.draw.rect(self.town.game.screen, WHITE, ((WIDTH / 2) + 2 - WIDTH / 3, (HEIGHT / 5) + 2, (WIDTH / 1.5) - 4, (HEIGHT / 1.5) - 4), 0)
-        self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 4, 250, 60, "Shop", 40, self.town.game)
-        self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 3, 200, 50, "Armour", 25, self.town.game)
+        self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 3.5, 250, 50, "Shop", 40, self.town.game)
+        self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2.5, 200, 50, "Armour", 25, self.town.game)
         self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Medicine", 25, self.town.game)
         while shopping:
             position = pygame.mouse.get_pos()
@@ -1205,7 +1205,10 @@ class Town_Shop(pygame.sprite.Sprite):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     shopping = False
-                    self.leaving = True
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        shopping = False
 
                 if event.type == pygame.MOUSEMOTION:
                         if self.armour.mouse_over(position):

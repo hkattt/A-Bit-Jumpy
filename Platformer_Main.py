@@ -82,12 +82,13 @@ class Game():
 
     def run(self):
         """Main game loop"""
-        self.playing = True
-        while self.playing:
-            self.clock.tick(FPS)
-            self.events()
-            self.update()
-            self.paint()
+        if self.running:
+            self.playing = True
+            while self.playing:
+                self.clock.tick(FPS)
+                self.events()
+                self.update()
+                self.paint()
 
     def update(self):
         """Updates Window"""
@@ -113,6 +114,12 @@ class Game():
                 if self.playing:
                     self.playing = False
                 self.running = False
+
+            if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        if self.playing:
+                            self.playing = False
+                        self.running = False
         # Checks if the player died
         if self.hero.dead == True:
             self.playing = False
@@ -171,6 +178,14 @@ class Game():
         self.write("Move and jumper with arrows or WASD, shoot with Shift", WHITE, 25, WIDTH / 2, HEIGHT / 2)
         self.write("Press any key to play!", WHITE, 25, WIDTH / 2, HEIGHT / 1.5)
         pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                waiting = False
+                self.running = False
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
         self.wait() # Waits for user input 
         
     def end_screen(self):
@@ -180,14 +195,34 @@ class Game():
             self.write("GAME OVER!!", WHITE, 60, WIDTH / 2, HEIGHT / 5)
             self.write("Press any key to play again", WHITE, 25, WIDTH / 2, HEIGHT / 2)
             pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    self.running = False
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        if self.playing:
+                            self.playing = False
+                        self.running = False
             self.wait() # Waits for user input
 
     def level_transition(self):
-        """Level transistion screen"""
+        """Level transition screen"""
         if self.running: # Game has not ended
             self.screen.fill(LIGHT_GREEN[0])
             self.write("Level " + str(self.level), WHITE, 60, WIDTH / 2, HEIGHT / 2)
             pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    self.running = False
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        if self.playing:
+                            self.playing = False
+                        self.running = False
             time.sleep(1.5) # Stops the program for 1.5 seconds
 
     def difficulty_screen(self):
@@ -208,6 +243,11 @@ class Game():
                     if event.type == pygame.QUIT:
                         waiting = False
                         self.running = False
+                    
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            waiting = False
+                            self.running = False
 
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if self.god_mode.mouse_over(position):
@@ -242,6 +282,10 @@ class Game():
                 if event.type == pygame.QUIT:
                     waiting = False
                     self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        waiting = False
+                        self.running = False
                 # Checks if the user pressed down a key
                 if event.type == pygame.KEYUP:
                     waiting = False
@@ -327,7 +371,12 @@ class Town():
             if event.type == pygame.QUIT:
                 if self.playing:
                     self.playing = False
-                self.running = False
+                self.game.running = False
+            if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        if self.playing:
+                            self.playing = False
+                        self.game.running = False
 
     def paint(self):
         """Draws the sprites onto the display window"""

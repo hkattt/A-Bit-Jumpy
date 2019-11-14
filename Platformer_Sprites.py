@@ -121,8 +121,8 @@ class Hero(pygame.sprite.Sprite):
         self.acceleration.x += self.velocity.x * FRIC
         # Equations of motion
         self.velocity += self.acceleration
-        #if abs(self.velocity.x) < 0.2:
-        #    self.velocity.x = 0
+        if abs(self.velocity.x) < 0.2:
+            self.velocity.x = 0
         self.position += self.velocity + 0.5 * self.acceleration
         self.rect.midbottom = self.position
 

@@ -1208,7 +1208,7 @@ class Town_Shop(pygame.sprite.Sprite):
             if collisions:
                 if collisions[0] == self:
                     self.image = self.door[1]
-                    # Closed if the hero is not standing on it
+            # Closed if the hero is not standing on it
             else:
                 self.image = self.door[0]
 
@@ -1222,54 +1222,72 @@ class Town_Shop(pygame.sprite.Sprite):
 
     def shop(self):
         shopping = True
+        # Creates shop screen
         screen_outline = pygame.draw.rect(self.town.game.screen, BLACK, ((WIDTH / 2) - WIDTH / 3, HEIGHT / 5, WIDTH / 1.5, HEIGHT / 1.5), 0)        
         screen = pygame.draw.rect(self.town.game.screen, WHITE, ((WIDTH / 2) + 2 - WIDTH / 3, (HEIGHT / 5) + 2, (WIDTH / 1.5) - 4, (HEIGHT / 1.5) - 4), 0)
         if self.town.game.difficulty != "god":
+            # Creates shop buttons
             self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 3.5, 250, 50, "Shop", 40, self.town.game)
             self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Armour: " + str(int(5 / self.town.game.hero.difficulty_multiplier)) + " gold", 25, self.town.game)
             self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 1.5, 200, 50, "Medicine: " + str(int(10 / self.town.game.hero.difficulty_multiplier)) + " gold" , 25, self.town.game)
+            # Continues until the player leaves the shop
             while shopping:
+                # Position of the mouse
                 position = pygame.mouse.get_pos()
+                # Draws buttons
                 self.shop_heading.draw(self.town.game.screen)
                 self.armour.draw(self.town.game.screen)
                 self.health.draw(self.town.game.screen)
                 pygame.display.update()
                 
                 for event in pygame.event.get():
+                    # Checks if the player wants to quit
                     if event.type == pygame.QUIT:
                         shopping = False
-                    
+                    # Checks if the player pressed escape 
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
                             shopping = False
-
+                    # If the mouse button was pressed
                     if event.type == pygame.MOUSEBUTTONDOWN:
+                        # Is over the armour button
                         if self.armour.mouse_over(position):
+                            # Checks if the player has enough gold
                             if self.town.game.hero.gold >= int(5 / self.town.game.hero.difficulty_multiplier):
+                                # Checks if the player has max armour
                                 if self.town.game.hero.armour < self.town.game.hero.max_armour:
                                     self.town.game.hero.armour += 1
+                            # Turns red when the player cannot afford the armour
                             else:
                                 self.armour.colour = RED
-
+                        # Is over the medicine button
                         if self.health.mouse_over(position):
+                            # Checks if the player can afford the medicine
                             if self.town.game.hero.gold >= int(10 / self.town.game.hero.difficulty_multiplier):
+                                # Checks if the player already has max hearts
                                 if self.town.game.hero.hearts < 3:
                                     self.town.game.hero.hearts = 3
+                                # Button turns red if the player has max health
                                 else:
                                     self.armour.colour = RED
+                            # Button turns red when the player cannot afford the armour
                             else:
                                 self.armour.colour = RED
-
+                    # Mouse has moved
                     if event.type == pygame.MOUSEMOTION:
+                            # If the mouse is over the armour button
                             if self.armour.mouse_over(position) and self.armour.colour != RED:
                                 self.armour.colour = GREY[1]
                             else:
                                 self.armour.colour = GREY[0]
+                            # If the mouse is over the medicine button
                             if self.health.mouse_over(position) and self.armour.colour != RED:
                                 self.health.colour = GREY[1]
                             else:
                                 self.health.colour = GREY[0]
+        # God mode
         else:
+            # Reminds the player that they are bad (in a nice way)
             self.message = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 65, "YOU'RE INVINCIBLE", 25, self.town.game)
             while shopping:
                 self.message.draw(self.town.game.screen)

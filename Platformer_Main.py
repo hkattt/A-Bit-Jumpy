@@ -220,10 +220,11 @@ class Game():
             self.write("Level " + str(self.level), WHITE, 60, WIDTH / 2, HEIGHT / 2)
             pygame.display.update()
             for event in pygame.event.get():
+                # Player quit
                 if event.type == pygame.QUIT:
                     waiting = False
                     self.running = False
-                
+                # Pressed escape
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         if self.playing:
@@ -283,10 +284,13 @@ class Game():
                             self.impossible_mode.colour = LIGHT_GREEN[1]
 
     def victory_screen(self):
+        """Victory screen displays when the player beat the game"""
+        # Only appears when the player beat all the levels and the game is still running
         if self.running and self.level > 3:
             self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
             self.write("You beat the game!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
             waiting = True
+            # Will display until the game is quit
             while waiting:
                 pygame.display.update()
                 for event in pygame.event.get():
@@ -302,7 +306,10 @@ class Game():
 
     def town_level(self):
         """Creates town for player to walk around in"""
+        # Game must be running and the hero must be alive
+        # Below max level
         if self.running and not self.hero.dead and self.level <= 3:
+            # Creates town object 
             self.town = Town(self)
             self.town.new()
 
@@ -391,6 +398,7 @@ class Town():
     
     def run(self):
         """Runs the town game loop"""
+        # Town loop will continue to run until self.playing is set to false
         self.playing = True
         while self.playing:
             self.clock.tick(FPS)
@@ -406,6 +414,7 @@ class Town():
                 if self.playing:
                     self.playing = False
                 self.game.running = False
+            # Checks if the user pressed escape
             if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         if self.playing:
@@ -414,6 +423,7 @@ class Town():
 
     def paint(self):
         """Draws the sprites onto the display window"""
+        # Cycles through all the sprite groups and blits them onto the screen
         for sprite in self.town_blocks:
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.path_blocks:

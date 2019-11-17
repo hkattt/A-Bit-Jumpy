@@ -1288,7 +1288,7 @@ class Town_Shop(pygame.sprite.Sprite):
         # God mode
         else:
             # Reminds the player that they are bad (in a nice way)
-            self.message = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 65, "YOU'RE INVINCIBLE", 25, self.town.game)
+            self.message = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 80, "YOU'RE INVINCIBLE", 25, self.town.game)
             while shopping:
                 self.message.draw(self.town.game.screen)
                 pygame.display.update()

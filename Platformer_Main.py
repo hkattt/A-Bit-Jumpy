@@ -19,7 +19,7 @@ class Game():
         pygame.init() 
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT)) # Game window
-        pygame.display.set_caption("Platformer") # Game windows caption
+        pygame.display.set_caption("Bow Man: A Bit Jumpy") # Game windows caption
         self.clock = pygame.time.Clock()
         self.running = True
         self.level = 1
@@ -180,7 +180,7 @@ class Game():
     def start_screen(self):
         """Games start screen"""
         self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
-        self.write("Platformer", WHITE, 60, WIDTH / 2, HEIGHT / 5)
+        self.write("Bow Man: A Bit Jumpy", WHITE, 60, WIDTH / 2, HEIGHT / 5)
         self.write("Move and jump with arrows or WASD, use shift to shoot and enter the shop", WHITE, 25, WIDTH / 2, HEIGHT / 2)
         self.write("Press any key to play!", WHITE, 25, WIDTH / 2, HEIGHT / 1.5)
         pygame.display.update()

@@ -295,11 +295,14 @@ class Game():
                     if event.type == pygame.QUIT:
                         waiting = False
                         self.running = False
-
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            waiting = False
+                            self.running = False
 
     def town_level(self):
         """Creates town for player to walk around in"""
-        if self.running and not self.hero.dead:
+        if self.running and not self.hero.dead and self.level <= 3:
             self.town = Town(self)
             self.town.new()
 

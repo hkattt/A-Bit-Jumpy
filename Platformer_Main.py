@@ -57,6 +57,7 @@ class Game():
                         else:
                             self.hero.position.x = column * TILE_SIZE
                             self.hero.position.y = row * TILE_SIZE
+                            self.hero.rect.x, self.hero.rect.y = self.hero.position.x, self.hero.position.y
                             self.all_sprites.add(self.hero)
                     elif tile == "D":
                         self.door = Door(column, row, self)
@@ -76,7 +77,7 @@ class Game():
                         self.jump_pad = Jump_Pad(column, row, self)
                     else:
                         self.environment_block = Environment(column, row, tile, self)
-                  
+                
         self.camera = Camera(self.map.width, self.map.height)
         # Hero attribute display objects
         self.health_display = Health(0, 0, self)
@@ -281,6 +282,21 @@ class Game():
                         else:
                             self.impossible_mode.colour = LIGHT_GREEN[1]
 
+    def victory_screen(self):
+        if self.running and self.level > 3:
+            self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
+            self.write("You beat the game!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
+            waiting = True
+            while waiting:
+                pygame.display.update()
+                for event in pygame.event.get():
+                    position = pygame.mouse.get_pos()
+
+                    if event.type == pygame.QUIT:
+                        waiting = False
+                        self.running = False
+
+
     def town_level(self):
         """Creates town for player to walk around in"""
         if self.running and not self.hero.dead:
@@ -417,4 +433,5 @@ while game.running:
     game.new()
     game.town_level()
     game.end_screen()
+    game.victory_screen()
 pygame.quit()

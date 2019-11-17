@@ -1224,42 +1224,64 @@ class Town_Shop(pygame.sprite.Sprite):
         shopping = True
         screen_outline = pygame.draw.rect(self.town.game.screen, BLACK, ((WIDTH / 2) - WIDTH / 3, HEIGHT / 5, WIDTH / 1.5, HEIGHT / 1.5), 0)        
         screen = pygame.draw.rect(self.town.game.screen, WHITE, ((WIDTH / 2) + 2 - WIDTH / 3, (HEIGHT / 5) + 2, (WIDTH / 1.5) - 4, (HEIGHT / 1.5) - 4), 0)
-        self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 3.5, 250, 50, "Shop", 40, self.town.game)
-        self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Armour: " + str(int(5 / self.town.game.hero.difficulty_multiplier)) + " gold", 25, self.town.game)
-        self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 1.5, 200, 50, "Medicine: " + str(int(10 / self.town.game.hero.difficulty_multiplier)) + " gold" , 25, self.town.game)
-        while shopping:
-            position = pygame.mouse.get_pos()
-            self.shop_heading.draw(self.town.game.screen)
-            self.armour.draw(self.town.game.screen)
-            self.health.draw(self.town.game.screen)
-            pygame.display.update()
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    shopping = False
+        if self.town.game.difficulty != "god":
+            self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 3.5, 250, 50, "Shop", 40, self.town.game)
+            self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Armour: " + str(int(5 / self.town.game.hero.difficulty_multiplier)) + " gold", 25, self.town.game)
+            self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 1.5, 200, 50, "Medicine: " + str(int(10 / self.town.game.hero.difficulty_multiplier)) + " gold" , 25, self.town.game)
+            while shopping:
+                position = pygame.mouse.get_pos()
+                self.shop_heading.draw(self.town.game.screen)
+                self.armour.draw(self.town.game.screen)
+                self.health.draw(self.town.game.screen)
+                pygame.display.update()
                 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
                         shopping = False
+                    
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            shopping = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.armour.mouse_over(position):
-                        if self.town.game.hero.armour < self.town.game.hero.max_armour:
-                            self.town.game.hero.armour += 1
-                    if self.health.mouse_over(position):
-                        if self.town.game.hero.hearts < 3:
-                            self.town.game.hero.hearts = 3
-
-                if event.type == pygame.MOUSEMOTION:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
                         if self.armour.mouse_over(position):
-                            self.armour.colour = GREY[1]
-                        else:
-                            self.armour.colour = GREY[0]
+                            if self.town.game.hero.gold >= int(5 / self.town.game.hero.difficulty_multiplier):
+                                if self.town.game.hero.armour < self.town.game.hero.max_armour:
+                                    self.town.game.hero.armour += 1
+                            else:
+                                self.armour.colour = RED
+
                         if self.health.mouse_over(position):
-                            self.health.colour = GREY[1]
-                        else:
-                            self.health.colour = GREY[0]
+                            if self.town.game.hero.gold >= int(10 / self.town.game.hero.difficulty_multiplier):
+                                if self.town.game.hero.hearts < 3:
+                                    self.town.game.hero.hearts = 3
+                                else:
+                                    self.armour.colour = RED
+                            else:
+                                self.armour.colour = RED
+
+                    if event.type == pygame.MOUSEMOTION:
+                            if self.armour.mouse_over(position) and self.armour.colour != RED:
+                                self.armour.colour = GREY[1]
+                            else:
+                                self.armour.colour = GREY[0]
+                            if self.health.mouse_over(position) and self.armour.colour != RED:
+                                self.health.colour = GREY[1]
+                            else:
+                                self.health.colour = GREY[0]
+        else:
+            self.message = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 65, "YOU'RE INVINCIBLE", 25, self.town.game)
+            while shopping:
+                self.message.draw(self.town.game.screen)
+                pygame.display.update()
                 
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        shopping = False
+                    
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            shopping = False
             
 
         self.town.hero.rect.y += 64

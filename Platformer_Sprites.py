@@ -34,11 +34,15 @@ class Hero(pygame.sprite.Sprite):
         self.arrow_timer = 0
         self.keys = []
         self.hearts = 3
+        self.armour = 0
+        self.max_armour = 3
         self.dead = False
         self.coins = self.game.hero_coins
         self.max_coins = 999
         if self.game.difficulty == "normal":
             self.difficulty_multiplier = 1
+        elif self.game.difficulty == "impossible":
+            self.difficulty_multiplier = 0.5
         else:
             self.difficulty_multiplier = 100
     
@@ -145,6 +149,8 @@ class Hero(pygame.sprite.Sprite):
     def died(self):
         """Checks if the player died"""
         if self.hearts < 1:
+            self.dead = True
+        if self.position.x > self.game.map.width or self.position.y > self.game.map.height:
             self.dead = True
 
     def animation(self):
@@ -334,7 +340,16 @@ class Orc(pygame.sprite.Sprite):
                 collisions[0].cooldown = 1
                 # Deals damage
                 if self.game.difficulty == "normal":
-                    self.game.hero.hearts -= 1
+                    if self.game.hero.armour > 0:
+                        self.game.hero.armour -= 1
+                    else:
+                        self.game.hero.hearts -= 1
+                    
+                elif self.game.difficulty == "impossible":
+                    if self.game.hero.armour > 0:
+                        self.game.hero.armour -= 3
+                    else:
+                        self.game.hero.hearts -= 3
 
     def animation(self):
         """Animates the orc sprite"""
@@ -406,8 +421,13 @@ class Fly(pygame.sprite.Sprite):
             if collisions[0] == self:
                 collisions[0].cooldown = 1
                 # Deals damage
-                if self.game.difficulty == "normal":
-                    self.game.hero.hearts -= 3
+                if self.game.difficulty == "normal" or self.game.difficulty == "impossible":
+                    if self.game.hero.armour > 0:
+                        self.game.hero.armour -= 3
+                        if self.game.hero.armour < 3:
+                            self.game.hero.armour = 0
+                    else:
+                        self.game.hero.hearts -= 3
 
     def died(self):
         """Checks if the fly died"""
@@ -494,10 +514,18 @@ class Spawner(pygame.sprite.Sprite):
 
     def create_enemy(self):
         """Spawns an orc enemy"""
-        # Only spawns an orc when there are less than 3 alive (3 for each spawner)
-        if len(self.orcs) < 2: 
-            self.spawning = True
-            return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
+        # Normal or god mode selected
+        if self.game.difficulty == "normal" or self.game.difficulty == "god":
+            # Only two orcs can be alive at any one time
+            if len(self.orcs) < 2: 
+                self.spawning = True
+                return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
+        # Impossible difficulty
+        elif self.game.difficulty == "impossible":
+            # More orcs can be alive at once when playing on the impossible difficulty
+            if len(self.orcs) < 4:
+                self.spawning = True
+                return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
 
     def animation(self):
         """Animates the orc sprite"""
@@ -576,7 +604,6 @@ class Arrow(pygame.sprite.Sprite):
         self.acceleration = vector(0,0)
         self.rect = self.image.get_rect()
         self.start_timer = 0
-        self.damage = 1000
         self.damage = 100
         self.hit = False
 
@@ -716,7 +743,8 @@ class Spikes(pygame.sprite.Sprite):
         # Landed on a spike
         if collisions:
             # Deals damage
-            if self.game.difficulty == "normal":
+            # Armour does not block it
+            if self.game.difficulty == "normal" or self.game.difficulty == "impossible":
                 self.game.hero.hearts -= 3
 
     def load_images(self):
@@ -852,7 +880,12 @@ class Coin(pygame.sprite.Sprite):
         # Player is standing on the coin
         if collisions:
             # Hero gets the coin
-            self.game.hero.coins += 1 * self.game.hero.difficulty_multiplier
+            if self.game.difficulty == "impossible":
+                coin = random.randint(1, 2)
+                if coin == 1:
+                    self.game.hero.coins += 1
+            else:
+                self.game.hero.coins += 1 * self.game.hero.difficulty_multiplier
             if self.game.hero.coins > self.game.hero.max_coins:
                 self.game.hero.coins = self.game.hero.max_coins
             self.game.all_sprites.remove(collisions[0])
@@ -1192,8 +1225,8 @@ class Town_Shop(pygame.sprite.Sprite):
         screen_outline = pygame.draw.rect(self.town.game.screen, BLACK, ((WIDTH / 2) - WIDTH / 3, HEIGHT / 5, WIDTH / 1.5, HEIGHT / 1.5), 0)        
         screen = pygame.draw.rect(self.town.game.screen, WHITE, ((WIDTH / 2) + 2 - WIDTH / 3, (HEIGHT / 5) + 2, (WIDTH / 1.5) - 4, (HEIGHT / 1.5) - 4), 0)
         self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 3.5, 250, 50, "Shop", 40, self.town.game)
-        self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2.5, 200, 50, "Armour", 25, self.town.game)
-        self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Medicine", 25, self.town.game)
+        self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Armour: " + str(int(5 / self.town.game.hero.difficulty_multiplier)) + " gold", 25, self.town.game)
+        self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 1.5, 200, 50, "Medicine: " + str(int(10 / self.town.game.hero.difficulty_multiplier)) + " gold" , 25, self.town.game)
         while shopping:
             position = pygame.mouse.get_pos()
             self.shop_heading.draw(self.town.game.screen)
@@ -1209,6 +1242,14 @@ class Town_Shop(pygame.sprite.Sprite):
                     if event.key == pygame.K_ESCAPE:
                         shopping = False
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.armour.mouse_over(position):
+                        if self.town.game.hero.armour < self.town.game.hero.max_armour:
+                            self.town.game.hero.armour += 1
+                    if self.health.mouse_over(position):
+                        if self.town.game.hero.hearts < 3:
+                            self.town.game.hero.hearts = 3
+
                 if event.type == pygame.MOUSEMOTION:
                         if self.armour.mouse_over(position):
                             self.armour.colour = GREY[1]
@@ -1218,6 +1259,8 @@ class Town_Shop(pygame.sprite.Sprite):
                             self.health.colour = GREY[1]
                         else:
                             self.health.colour = GREY[0]
+                
+            
 
         self.town.hero.rect.y += 64
 

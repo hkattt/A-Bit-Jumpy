@@ -55,8 +55,8 @@ class Game():
                         if self.level == 1:
                             self.hero = Hero(column, row, self)
                         else:
-                            self.hero.rect.x = column * TILE_SIZE
-                            self.hero.rect.y = row * TILE_SIZE
+                            self.hero.position.x = column * TILE_SIZE
+                            self.hero.position.y = row * TILE_SIZE
                             self.all_sprites.add(self.hero)
                     elif tile == "D":
                         self.door = Door(column, row, self)
@@ -144,13 +144,13 @@ class Game():
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.spikes:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
-        for sprite in self.arrows:
-            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.keys:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.coins:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.spawners:
+            self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
+        for sprite in self.arrows:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         for sprite in self.orcs:
             self.screen.blit(sprite.image, self.camera.move_sprite(sprite))
@@ -180,7 +180,7 @@ class Game():
         """Games start screen"""
         self.screen.fill(LIGHT_GREEN[0]) # Makes the windows background green
         self.write("Platformer", WHITE, 60, WIDTH / 2, HEIGHT / 5)
-        self.write("Move and jumper with arrows or WASD, shoot with Shift", WHITE, 25, WIDTH / 2, HEIGHT / 2)
+        self.write("Move and jump with arrows or WASD, use shift to shoot and enter the shop", WHITE, 25, WIDTH / 2, HEIGHT / 2)
         self.write("Press any key to play!", WHITE, 25, WIDTH / 2, HEIGHT / 1.5)
         pygame.display.update()
         for event in pygame.event.get():
@@ -237,10 +237,12 @@ class Game():
             self.write("Select The Game Difficulty!!", WHITE, 45, WIDTH / 2, HEIGHT / 5)
             self.god_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 3, 200, 50, "God Mode", 25, self)
             self.normal_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 2, 200, 50, "Normal", 25, self)
+            self.impossible_mode = Button(LIGHT_GREEN[1], WIDTH / 2, HEIGHT / 1.5, 200, 50, "Impossible", 25, self )
             waiting = True
             while waiting:
                 self.god_mode.draw(self.screen)
                 self.normal_mode.draw(self.screen)
+                self.impossible_mode.draw(self.screen)
                 pygame.display.update()
                 for event in pygame.event.get():
                     position = pygame.mouse.get_pos()
@@ -261,6 +263,9 @@ class Game():
                         elif self.normal_mode.mouse_over(position):
                             self.difficulty = "normal"
                             waiting = False
+                        elif self.impossible_mode.mouse_over(position):
+                            self.difficulty = "impossible"
+                            waiting = False
                     
                     if event.type == pygame.MOUSEMOTION:
                         if self.god_mode.mouse_over(position):
@@ -271,11 +276,16 @@ class Game():
                             self.normal_mode.colour = LIGHT_GREEN[2]
                         else:
                             self.normal_mode.colour = LIGHT_GREEN[1]
+                        if self.impossible_mode.mouse_over(position):
+                            self.impossible_mode.colour = LIGHT_GREEN[2]
+                        else:
+                            self.impossible_mode.colour = LIGHT_GREEN[1]
 
     def town_level(self):
         """Creates town for player to walk around in"""
-        self.town = Town(self)
-        self.town.new()
+        if self.running and not self.hero.dead:
+            self.town = Town(self)
+            self.town.new()
 
     def wait(self):
         """Waits for user input"""
@@ -403,9 +413,8 @@ game.start_screen()
 game.difficulty_screen()
 # Continues creating new games until the game.running variable is set to False
 while game.running:
-    #game.town_level()
-    #game.level_transition()
+    game.level_transition()
     game.new()
-    game.kill()
+    game.town_level()
     game.end_screen()
 pygame.quit()

@@ -43,7 +43,7 @@ class Hero(pygame.sprite.Sprite):
             self.difficulty_multiplier = 100
     
     def update(self):
-        """Upadtes the hero object"""
+        """Updates the hero object"""
         self.animation()
         self.get_keys()
         self.move()
@@ -853,9 +853,8 @@ class Coin(pygame.sprite.Sprite):
         if collisions:
             # Hero gets the coin
             self.game.hero.coins += 1 * self.game.hero.difficulty_multiplier
-            self.game.hero_coins += 1 * self.game.hero.difficulty_multiplier
             if self.game.hero.coins > self.game.hero.max_coins:
-                self.game.hero.coins, self.game.hero_coins = self.game.hero.max_coins, self.game.hero.max_coins
+                self.game.hero.coins = self.game.hero.max_coins
             self.game.all_sprites.remove(collisions[0])
             self.game.coins.remove(collisions[0])
 

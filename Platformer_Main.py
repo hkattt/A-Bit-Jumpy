@@ -52,7 +52,12 @@ class Game():
                 # Creates object based on the list items (string)
                 if tile != ".":
                     if tile == "P":
-                        self.hero_x, self.hero_y = column, row
+                        if self.level == 1:
+                            self.hero = Hero(column, row, self)
+                        else:
+                            self.hero.rect.x = column * TILE_SIZE
+                            self.hero.rect.y = row * TILE_SIZE
+                            self.all_sprites.add(self.hero)
                     elif tile == "D":
                         self.door = Door(column, row, self)
                     elif tile == "s":
@@ -71,12 +76,12 @@ class Game():
                         self.jump_pad = Jump_Pad(column, row, self)
                     else:
                         self.environment_block = Environment(column, row, tile, self)
+                  
         self.camera = Camera(self.map.width, self.map.height)
         # Hero attribute display objects
         self.health_display = Health(0, 0, self)
         self.key_display = Key_Display(1, 0, self)
         self.coin_display = Coin_Count(2, 0, self)
-        self.hero = Hero(self.hero_x, self.hero_y, self)
         self.enemy_timer = 0
         self.run()
 
@@ -398,8 +403,9 @@ game.start_screen()
 game.difficulty_screen()
 # Continues creating new games until the game.running variable is set to False
 while game.running:
-    game.town_level()
-    game.level_transition()
+    #game.town_level()
+    #game.level_transition()
     game.new()
+    game.kill()
     game.end_screen()
 pygame.quit()

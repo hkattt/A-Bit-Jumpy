@@ -436,7 +436,7 @@ class Town():
             self.game.screen.blit(sprite.image, self.camera.move_sprite(sprite))
         self.game.screen.blit(self.hero.image, self.camera.move_sprite(self.hero))
         pygame.display.update()
-
+    
 game = Game() # Creates game object
 game.start_screen()
 game.difficulty_screen()

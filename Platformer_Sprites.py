@@ -541,18 +541,10 @@ class Spawner(pygame.sprite.Sprite):
 
     def create_enemy(self):
         """Spawns an orc enemy"""
-        # Normal or god mode selected
-        if self.game.difficulty == "normal" or self.game.difficulty == "god":
-            # Only two orcs can be alive at any one time
-            if len(self.orcs) < 2: 
-                self.spawning = True
-                return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
-        # Impossible difficulty
-        elif self.game.difficulty == "impossible":
-            # More orcs can be alive at once when playing on the impossible difficulty
-            if len(self.orcs) < 4:
-                self.spawning = True
-                return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
+        # Only two orcs can be alive at any one time
+        if len(self.orcs) < 2: 
+            self.spawning = True
+            return Orc(self.rect.x / TILE_SIZE, self.rect.y / TILE_SIZE, self.game, self)
 
     def animation(self):
         """Animates the orc sprite"""

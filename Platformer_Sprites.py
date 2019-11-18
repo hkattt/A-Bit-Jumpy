@@ -19,6 +19,7 @@ class Hero(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
+        self.load_sounds()
         self.image = self.standing[0]
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.rect = self.image.get_rect()
@@ -143,15 +144,19 @@ class Hero(pygame.sprite.Sprite):
             if self.rect.bottom == lowest.rect.top + 10:
                 if self.game.jump_pad.can_jump(): # Is on a jump pad
                     self.velocity.y = -10.2
+                    pygame.mixer.Sound.play(self.jump[1])
                 else:
                     self.velocity.y = -7
+                    pygame.mixer.Sound.play(self.jump[0])
 
     def died(self):
         """Checks if the player died"""
         if self.hearts < 1:
             self.dead = True
+            pygame.mixer.Sound.play(self.dead_sound)
         if self.position.x > self.game.map.width or self.position.y > self.game.map.height:
             self.dead = True
+            pygame.mixer.Sound.play(self.dead_sound)
 
     def animation(self):
         """Animates the hero sprite"""
@@ -199,6 +204,12 @@ class Hero(pygame.sprite.Sprite):
         self.bow_left = [pygame.image.load("hero_bow_left_1.png"), pygame.image.load("hero_bow_left_2.png"), pygame.image.load("hero_bow_left_3.png"), pygame.image.load("hero_bow_left_4.png"), pygame.image.load("hero_bow_left_5.png"), pygame.image.load("hero_bow_left_6.png"), pygame.image.load("hero_bow_left_7.png"), pygame.image.load("hero_bow_left_8.png"), pygame.image.load("hero_bow_left_9.png"), pygame.image.load("hero_bow_left_10.png"), pygame.image.load("hero_bow_left_11.png"), pygame.image.load("hero_bow_left_12.png"), pygame.image.load("hero_bow_left_13.png")]       
         self.bow_right = [pygame.image.load("hero_bow_right_1.png"), pygame.image.load("hero_bow_right_2.png"), pygame.image.load("hero_bow_right_3.png"), pygame.image.load("hero_bow_right_4.png"), pygame.image.load("hero_bow_right_5.png"), pygame.image.load("hero_bow_right_6.png"), pygame.image.load("hero_bow_right_7.png"), pygame.image.load("hero_bow_right_8.png"), pygame.image.load("hero_bow_right_9.png"), pygame.image.load("hero_bow_right_10.png"), pygame.image.load("hero_bow_right_11.png"), pygame.image.load("hero_bow_right_12.png"), pygame.image.load("hero_bow_right_13.png")]
 
+    def load_sounds(self):
+        """Loads in sounds for hero sprite"""
+        self.jump = [pygame.mixer.Sound("jump_1.wav"), pygame.mixer.Sound("jump_2.wav")]
+        self.hit = pygame.mixer.Sound("hit.wav")
+        self.dead_sound = pygame.mixer.Sound("dead.wav")
+        
 class Orc(pygame.sprite.Sprite):
     """Orc enemy object"""
     def __init__(self, x, y, game, spawner):
@@ -208,6 +219,7 @@ class Orc(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
+        self.load_sounds()
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.velocity = vector(0, 0) 
         self.image = self.walking_left[0]
@@ -271,6 +283,7 @@ class Orc(pygame.sprite.Sprite):
             self.game.all_sprites.remove(self)
             if self.spawner != None:
                 self.spawner.orcs.remove(self)
+            pygame.mixer.Sound.play(self.dead_sound)
 
     def move(self):
         """Moves orc sprite"""
@@ -350,6 +363,7 @@ class Orc(pygame.sprite.Sprite):
                         self.game.hero.armour -= 3
                     else:
                         self.game.hero.hearts -= 3
+                pygame.mixer.Sound.play(self.hit)
 
     def animation(self):
         """Animates the orc sprite"""
@@ -372,6 +386,11 @@ class Orc(pygame.sprite.Sprite):
         self.walking_right = [pygame.image.load("orc_walking_right_1.png"), pygame.image.load("orc_walking_right_2.png"), pygame.image.load("orc_walking_right_3.png"), pygame.image.load("orc_walking_right_4.png"), pygame.image.load("orc_walking_right_5.png"), pygame.image.load("orc_walking_right_6.png"), pygame.image.load("orc_walking_right_7.png"), pygame.image.load("orc_walking_right_8.png"), pygame.image.load("orc_walking_right_9.png")]
         self.dead = pygame.image.load("orc_dead_1.png")
 
+    def load_sounds(self):
+        """Loads in sounds for orc"""
+        self.hit = pygame.mixer.Sound("hit.wav")
+        self.dead_sound = pygame.mixer.Sound("dead.wav")
+
 class Fly(pygame.sprite.Sprite):
     """Fly enemy object"""
     def __init__(self, x, y, game):
@@ -381,6 +400,7 @@ class Fly(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
+        self.load_sounds()
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.velocity = vector(random.choice([1, 1.5]), random.choice([1, 1.5]))
         self.acceleration = 0.2
@@ -428,6 +448,7 @@ class Fly(pygame.sprite.Sprite):
                             self.game.hero.armour = 0
                     else:
                         self.game.hero.hearts -= 3
+                    pygame.mixer.Sound.play(self.hit)
 
     def died(self):
         """Checks if the fly died"""
@@ -435,6 +456,7 @@ class Fly(pygame.sprite.Sprite):
             self.game.enemies.remove(self)
             self.game.flies.remove(self)
             self.game.all_sprites.remove(self)
+            pygame.mixer.Sound.play(self.dead_sound)
 
     def move(self):
         """Moves the fly sprite"""
@@ -490,6 +512,11 @@ class Fly(pygame.sprite.Sprite):
         self.fly_right = [pygame.image.load("fly_right_1.png"), pygame.image.load("fly_right_2.png")]
         self.fly_left = [pygame.image.load("fly_left_1.png"), pygame.image.load("fly_left_2.png")]
         self.fly_dead = [pygame.image.load("fly_right_dead.png"), pygame.image.load("fly_left_dead.png")]
+
+    def load_sounds(self):
+        """Loads in sounds for fly"""
+        self.hit = pygame.mixer.Sound("hit.wav")
+        self.dead_sound = pygame.mixer.Sound("dead.wav")
 
 class Spawner(pygame.sprite.Sprite):
     """ Orc spawner object"""
@@ -638,6 +665,7 @@ class Arrow(pygame.sprite.Sprite):
             collisions[0].health -= self.damage * self.game.hero.difficulty_multiplier
             self.velocity.x = 0
             self.hit = True
+            #pygame.mixer.Sound.play(self.hit)
             self.remove()
     
     def hit_wall(self):
@@ -726,6 +754,7 @@ class Spikes(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.load_images()
+        self.load_sounds()
         self.position = vector(int(x * TILE_SIZE), int(y * TILE_SIZE))
         self.image = self.spikes
         self.rect = self.image.get_rect()
@@ -746,10 +775,15 @@ class Spikes(pygame.sprite.Sprite):
             # Armour does not block it
             if self.game.difficulty == "normal" or self.game.difficulty == "impossible":
                 self.game.hero.hearts -= 3
+                pygame.mixer.Sound.play(self.hit)
 
     def load_images(self):
         """Loads in image for the spikes"""
         self.spikes = pygame.image.load("spikes.png")
+
+    def load_sounds(self):
+        """Loads in sounds for fly"""
+        self.hit = pygame.mixer.Sound("hit.wav")
 
 class Key(pygame.sprite.Sprite):
     """Key object"""
@@ -760,6 +794,7 @@ class Key(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.load_images()
+        self.load_sounds()
         self.image = self.key
         # Makes the image smaller
         self.image = pygame.transform.scale(self.image, (40, 40))
@@ -782,10 +817,15 @@ class Key(pygame.sprite.Sprite):
             self.game.hero.keys.append(collisions[0])
             self.game.keys.remove(collisions[0])
             self.game.all_sprites.remove(collisions[0])
+            pygame.mixer.Sound.play(self.sound_pu)
 
     def load_images(self):
         """Loads in image for the key"""
         self.key = pygame.image.load("key_1.png")
+
+    def load_sounds(self):
+        """Loads in sounds for the key"""
+        self.sound_pu = pygame.mixer.Sound("coin_sound.wav")
 
 class Door(pygame.sprite.Sprite):
     """Door object"""
@@ -849,6 +889,7 @@ class Coin(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.load_images()
+        self.load_sounds()
         self.position = vector(int(x * TILE_SIZE + 17), int(y * TILE_SIZE + 17))
         self.image = self.coin[0]
         self.image = pygame.transform.scale(self.image, (30, 30))
@@ -888,12 +929,17 @@ class Coin(pygame.sprite.Sprite):
                 self.game.hero.coins += 1 * self.game.hero.difficulty_multiplier
             if self.game.hero.coins > self.game.hero.max_coins:
                 self.game.hero.coins = self.game.hero.max_coins
+            pygame.mixer.Sound.play(self.coin_sound)
             self.game.all_sprites.remove(collisions[0])
             self.game.coins.remove(collisions[0])
 
     def load_images(self):
         """Loads in images for coin animation"""
         self.coin = [pygame.image.load("coin_1.png"), pygame.image.load("coin_2.png"), pygame.image.load("coin_3.png"), pygame.image.load("coin_4.png"), pygame.image.load("coin_5.png"), pygame.image.load("coin_6.png")]
+
+    def load_sounds(self):
+        """Loads in coin sounds"""
+        self.coin_sound = pygame.mixer.Sound("coin_sound.wav")
 
 # Town classes (For when the hero is in the town)
 
@@ -1022,6 +1068,10 @@ class Town_Hero(pygame.sprite.Sprite):
         self.walking_left = [pygame.image.load("hero_walking_left_1.png"), pygame.image.load("hero_walking_left_2.png"), pygame.image.load("hero_walking_left_3.png"), pygame.image.load("hero_walking_left_4.png"), pygame.image.load("hero_walking_left_5.png"), pygame.image.load("hero_walking_left_6.png"), pygame.image.load("hero_walking_left_7.png"), pygame.image.load("hero_walking_left_8.png"), pygame.image.load("hero_walking_left_9.png")]
         self.walking_up = [pygame.image.load("hero_walking_up_1.png"), pygame.image.load("hero_walking_up_2.png"), pygame.image.load("hero_walking_up_3.png"), pygame.image.load("hero_walking_up_4.png"), pygame.image.load("hero_walking_up_5.png"), pygame.image.load("hero_walking_up_6.png"), pygame.image.load("hero_walking_up_7.png"), pygame.image.load("hero_walking_up_8.png"), pygame.image.load("hero_walking_up_9.png")]
         self.walking_down = [pygame.image.load("hero_walking_down_1.png"), pygame.image.load("hero_walking_down_2.png"), pygame.image.load("hero_walking_down_3.png"), pygame.image.load("hero_walking_down_4.png"), pygame.image.load("hero_walking_down_5.png"), pygame.image.load("hero_walking_down_6.png"), pygame.image.load("hero_walking_down_7.png"), pygame.image.load("hero_walking_down_8.png"), pygame.image.load("hero_walking_down_9.png")]
+
+    def load_sounds(self):
+        """Loads in sounds for hero sprite"""
+        self.footsteps = pygame.mixer.Sound("Footsteps.wav")
 
 class Town_Terrain(pygame.sprite.Sprite):
     """Town environment"""
@@ -1228,8 +1278,9 @@ class Town_Shop(pygame.sprite.Sprite):
         if self.town.game.difficulty != "god":
             # Creates shop buttons
             self.shop_heading = Button(GREY[0], WIDTH / 2, HEIGHT / 3.5, 250, 50, "Shop", 40, self.town.game)
-            self.armour = Button(GREY[0], WIDTH / 2, HEIGHT / 2, 200, 50, "Armour: " + str(int(5 / self.town.game.hero.difficulty_multiplier)) + " gold", 25, self.town.game)
-            self.health = Button(GREY[0], WIDTH / 2, HEIGHT / 1.5, 200, 50, "Medicine: " + str(int(10 / self.town.game.hero.difficulty_multiplier)) + " gold" , 25, self.town.game)
+            self.armour = Button(GREY[0], WIDTH / 2, (HEIGHT / 3) + 35, 200, 50, "Armour: " + str(int(5 / self.town.game.hero.difficulty_multiplier)) + " gold", 25, self.town.game)
+            self.health = Button(GREY[0], WIDTH / 2, (HEIGHT / 2) + 35, 200, 50, "Medicine: " + str(int(10 / self.town.game.hero.difficulty_multiplier)) + " gold" , 25, self.town.game)
+            self.coins = Button(GREY[0], WIDTH / 2, (HEIGHT / 1.5) + 35, 200, 50, "Your Coins: " + str(int(self.town.game.hero.coins)), 25, self.town.game)
             # Continues until the player leaves the shop
             while shopping:
                 # Position of the mouse
@@ -1238,6 +1289,7 @@ class Town_Shop(pygame.sprite.Sprite):
                 self.shop_heading.draw(self.town.game.screen)
                 self.armour.draw(self.town.game.screen)
                 self.health.draw(self.town.game.screen)
+                self.coins.draw(self.town.game.screen)
                 pygame.display.update()
                 
                 for event in pygame.event.get():
@@ -1253,26 +1305,30 @@ class Town_Shop(pygame.sprite.Sprite):
                         # Is over the armour button
                         if self.armour.mouse_over(position):
                             # Checks if the player has enough gold
-                            if self.town.game.hero.gold >= int(5 / self.town.game.hero.difficulty_multiplier):
+                            if self.town.game.hero.coins >= int(5 / self.town.game.hero.difficulty_multiplier):
                                 # Checks if the player has max armour
                                 if self.town.game.hero.armour < self.town.game.hero.max_armour:
                                     self.town.game.hero.armour += 1
+                                    self.town.game.hero.coins -= int(5 / self.town.game.hero.difficulty_multiplier)
+                                    self.coins.text = "Your Coins: " + str(int(self.town.game.hero.coins))
                             # Turns red when the player cannot afford the armour
                             else:
                                 self.armour.colour = RED
                         # Is over the medicine button
                         if self.health.mouse_over(position):
                             # Checks if the player can afford the medicine
-                            if self.town.game.hero.gold >= int(10 / self.town.game.hero.difficulty_multiplier):
+                            if self.town.game.hero.coins >= int(10 / self.town.game.hero.difficulty_multiplier):
                                 # Checks if the player already has max hearts
                                 if self.town.game.hero.hearts < 3:
                                     self.town.game.hero.hearts = 3
+                                    self.town.game.hero.coins -= int(10 / self.town.game.hero.difficulty_multiplier)
+                                    self.coins.text = "Your Coins: " + str(int(self.town.game.hero.coins))
                                 # Button turns red if the player has max health
                                 else:
-                                    self.armour.colour = RED
+                                    self.health.colour = RED
                             # Button turns red when the player cannot afford the armour
                             else:
-                                self.armour.colour = RED
+                                self.health.colour = RED
                     # Mouse has moved
                     if event.type == pygame.MOUSEMOTION:
                             # If the mouse is over the armour button

@@ -1,8 +1,8 @@
 # Platformer game settings
 
 # Game window size
-WIDTH = 1024 # 32 * 32
-HEIGHT = 512 # 32 * 16
+WIDTH = 1024 
+HEIGHT = 512
 
 TILE_SIZE = 64
 GRID_WIDTH = WIDTH / TILE_SIZE
